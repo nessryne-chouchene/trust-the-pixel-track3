@@ -27,7 +27,7 @@ credentials/
 # ==============================
 # Datasets
 # ==============================
-data/
+/data/
 
 # ==============================
 # Models / weights
@@ -36,12 +36,12 @@ data/
 *.pth
 *.ckpt
 *.onnx
-models/
+/models/
 
 # ==============================
 # Outputs / generated files
 # ==============================
-outputs/
+/outputs/
 
 # ==============================
 # Jupyter
@@ -65,3 +65,5 @@ Thumbs.db
 *.tmp
 *.temp
 *.log
+
+.pytest_cache/
