@@ -1,0 +1,9 @@
+{
+  "case_id": "13_missing_signature",
+  "group": "scenes",
+  "description": "Image and manifest present, no .manifest.sig file.",
+  "spec_reference": "guide 7.3 scene 13",
+  "image": "scene_013.png",
+  "manifest": "scene_013.manifest.json",
+  "signature": "scene_013.manifest.sig"
+}

@@ -1,0 +1,56 @@
+{
+  "keys": [
+    {
+      "key_id": "sat-alpha-2026a",
+      "public_key_hex": "bc95f2215cc864cd0184a3238a1e030ba5c0f7462e395dec4092a33e934bd4e3",
+      "status": "active",
+      "allowed_sensors": [
+        "SAT-ALPHA-01",
+        "SAT-ALPHA-02"
+      ],
+      "valid_from": "2026-01-01T00:00:00Z",
+      "valid_until": "2027-01-01T00:00:00Z"
+    },
+    {
+      "key_id": "sat-bravo-2026a",
+      "public_key_hex": "f2e17c61ea6caccf60acf722744c6fa16fd65ff42310d30be6a407bdfac360d9",
+      "status": "active",
+      "allowed_sensors": [
+        "SAT-BRAVO-01"
+      ],
+      "valid_from": "2026-01-01T00:00:00Z",
+      "valid_until": "2027-01-01T00:00:00Z"
+    },
+    {
+      "key_id": "sat-alpha-2025x",
+      "public_key_hex": "2e6c833cc6a555809703dcb0a3b51869d39efbc05b8b6288e1be09a0a93ca03a",
+      "status": "revoked",
+      "revoked_at": "2026-09-01T00:00:00Z",
+      "allowed_sensors": [
+        "SAT-ALPHA-01"
+      ],
+      "valid_from": "2025-01-01T00:00:00Z",
+      "valid_until": "2027-01-01T00:00:00Z"
+    },
+    {
+      "key_id": "sat-charlie-2024",
+      "public_key_hex": "75d8ca87b591d110b5c7ef27b6667eceff890e8589e08db2c5fb39d166fe5ac8",
+      "status": "active",
+      "allowed_sensors": [
+        "SAT-CHARLIE-01"
+      ],
+      "valid_from": "2024-01-01T00:00:00Z",
+      "valid_until": "2025-01-01T00:00:00Z"
+    },
+    {
+      "key_id": "sat-delta-2027",
+      "public_key_hex": "8fb50b62cc0217e519a2a9ff96636d15c9d4f28be462dc156a94909fc68a9783",
+      "status": "active",
+      "allowed_sensors": [
+        "SAT-DELTA-01"
+      ],
+      "valid_from": "2027-01-01T00:00:00Z",
+      "valid_until": "2028-01-01T00:00:00Z"
+    }
+  ]
+}

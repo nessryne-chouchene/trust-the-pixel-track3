@@ -1,0 +1,9 @@
+{
+  "case_id": "39_sensor_of_other_key",
+  "group": "edge_cases",
+  "description": "sat-alpha-2026a signs for SAT-BRAVO-01, which only the bravo key may speak for.",
+  "spec_reference": "guide 3.2 allowed_sensors / 4.3 META_SENSOR",
+  "image": "scene_039.png",
+  "manifest": "scene_039.manifest.json",
+  "signature": "scene_039.manifest.sig"
+}

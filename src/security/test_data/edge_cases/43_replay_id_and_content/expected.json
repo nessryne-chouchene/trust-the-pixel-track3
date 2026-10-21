@@ -1,0 +1,12 @@
+{
+  "image_id": "scene_099",
+  "format_valid": true,
+  "signature_valid": true,
+  "metadata_valid": true,
+  "replay_detected": true,
+  "security_status": "FAILED",
+  "reason_codes": [
+    "REPLAY_ID",
+    "REPLAY_CONTENT"
+  ]
+}

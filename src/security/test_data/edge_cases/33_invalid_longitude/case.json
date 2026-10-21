@@ -1,0 +1,9 @@
+{
+  "case_id": "33_invalid_longitude",
+  "group": "edge_cases",
+  "description": "Longitude 200.5 (range is +-180).",
+  "spec_reference": "guide 4.3 META_LONGITUDE",
+  "image": "scene_033.png",
+  "manifest": "scene_033.manifest.json",
+  "signature": "scene_033.manifest.sig"
+}

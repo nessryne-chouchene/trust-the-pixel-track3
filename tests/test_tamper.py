@@ -38,3 +38,11 @@ def test_unknown_attack_and_bad_input_raise():
         tamper(_img(0), "unknown", np.random.default_rng(0))
     with pytest.raises(ValueError):
         tamper(_img(0).astype(np.float32), "blur", np.random.default_rng(0))
+
+
+def test_copy_move_never_fails_over_many_seeds():
+    img = _img(0)
+    for seed in range(500):
+        out, mask = tamper(img, "copy_move", np.random.default_rng(seed))
+        assert mask.sum() > 0
+        assert (mask == 0).sum() > 0

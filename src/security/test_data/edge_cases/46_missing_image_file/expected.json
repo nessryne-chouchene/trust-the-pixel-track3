@@ -1,0 +1,11 @@
+{
+  "image_id": "scene_046",
+  "format_valid": false,
+  "signature_valid": null,
+  "metadata_valid": null,
+  "replay_detected": null,
+  "security_status": "FAILED",
+  "reason_codes": [
+    "FORMAT_MISSING"
+  ]
+}

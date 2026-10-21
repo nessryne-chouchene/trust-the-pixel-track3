@@ -1,0 +1,9 @@
+{
+  "case_id": "35_future_timestamp",
+  "group": "edge_cases",
+  "description": "Observation 1 h after the reference time (skew tolerance 300 s).",
+  "spec_reference": "guide 4.3 META_TIME_FUTURE",
+  "image": "scene_035.png",
+  "manifest": "scene_035.manifest.json",
+  "signature": "scene_035.manifest.sig"
+}

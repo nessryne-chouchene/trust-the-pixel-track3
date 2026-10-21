@@ -1,0 +1,9 @@
+{
+  "case_id": "06_unknown_key",
+  "group": "scenes",
+  "description": "Correctly signed by sat-rogue-99, which is not in the trust store. Sensor exists elsewhere in the store, so metadata is valid.",
+  "spec_reference": "guide 7.3 scene 06",
+  "image": "scene_006.png",
+  "manifest": "scene_006.manifest.json",
+  "signature": "scene_006.manifest.sig"
+}

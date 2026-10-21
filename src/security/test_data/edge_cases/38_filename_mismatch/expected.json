@@ -1,0 +1,11 @@
+{
+  "image_id": "scene_038",
+  "format_valid": true,
+  "signature_valid": true,
+  "metadata_valid": false,
+  "replay_detected": false,
+  "security_status": "REVIEW",
+  "reason_codes": [
+    "META_FILENAME"
+  ]
+}

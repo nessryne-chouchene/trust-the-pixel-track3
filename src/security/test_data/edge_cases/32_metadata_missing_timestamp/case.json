@@ -1,0 +1,9 @@
+{
+  "case_id": "32_metadata_missing_timestamp",
+  "group": "edge_cases",
+  "description": "Validly signed manifest whose metadata lacks 'timestamp'.",
+  "spec_reference": "guide 4.3 META_MISSING_FIELD",
+  "image": "scene_032.png",
+  "manifest": "scene_032.manifest.json",
+  "signature": "scene_032.manifest.sig"
+}

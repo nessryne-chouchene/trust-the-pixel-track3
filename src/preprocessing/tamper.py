@@ -1,4 +1,4 @@
-﻿"""Generation de falsifications synthetiques avec masques exacts (v0.1).
+﻿"""Generation de falsifications synthetiques avec masques exacts (v0.2).
 
 Falsifications SIMPLES (rectangles) : un detecteur qui les repere ne prouve rien
 sur des falsifications realistes (images generees par IA, par exemple).
@@ -43,7 +43,10 @@ def tamper(image: np.ndarray, attack: str, rng: np.random.Generator,
         out[y:y + bh, x:x + bw] = donor[dy:dy + bh, dx:dx + bw]
 
     elif attack == "copy_move":
-        for _ in range(100):
+        # On retire la zone ENTIERE (taille + position) a chaque essai : une grande
+        # zone au centre peut ne laisser aucune source sans chevauchement.
+        for _ in range(200):
+            y, x, bh, bw = _rand_box(rng, h, w)
             sy = int(rng.integers(0, h - bh + 1))
             sx = int(rng.integers(0, w - bw + 1))
             if not _overlap(y, x, sy, sx, bh, bw):

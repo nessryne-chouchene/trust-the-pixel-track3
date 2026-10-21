@@ -1,0 +1,9 @@
+{
+  "case_id": "43_replay_id_and_content",
+  "group": "edge_cases",
+  "description": "Exact resend of the accepted scene_099 (same ID and same bytes).",
+  "spec_reference": "guide 4.4",
+  "image": "scene_099.png",
+  "manifest": "scene_099.manifest.json",
+  "signature": "scene_099.manifest.sig"
+}

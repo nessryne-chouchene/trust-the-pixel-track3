@@ -1,0 +1,9 @@
+{
+  "case_id": "29_key_expired",
+  "group": "edge_cases",
+  "description": "Active key valid 2024-01-01..2025-01-01 used to sign on 2026-10-13.",
+  "spec_reference": "guide 4.2 KEY_NOT_VALID",
+  "image": "scene_029.png",
+  "manifest": "scene_029.manifest.json",
+  "signature": "scene_029.manifest.sig"
+}

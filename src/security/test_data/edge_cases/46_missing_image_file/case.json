@@ -1,0 +1,9 @@
+{
+  "case_id": "46_missing_image_file",
+  "group": "edge_cases",
+  "description": "Manifest and signature present, image file absent.",
+  "spec_reference": "not covered by the guide: extension code FORMAT_MISSING (documented)",
+  "image": "scene_046.png",
+  "manifest": "scene_046.manifest.json",
+  "signature": "scene_046.manifest.sig"
+}

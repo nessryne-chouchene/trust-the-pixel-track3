@@ -1,0 +1,9 @@
+{
+  "case_id": "34_non_numeric_latitude",
+  "group": "edge_cases",
+  "description": "Latitude given as the string \"36.8\" instead of a number.",
+  "spec_reference": "guide 4.3 'is a number'",
+  "image": "scene_034.png",
+  "manifest": "scene_034.manifest.json",
+  "signature": "scene_034.manifest.sig"
+}

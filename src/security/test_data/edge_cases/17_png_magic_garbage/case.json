@@ -1,0 +1,9 @@
+{
+  "case_id": "17_png_magic_garbage",
+  "group": "edge_cases",
+  "description": "Correct PNG magic followed by random bytes; the image library cannot open it.",
+  "spec_reference": "guide 4.1 'image library reports the same format' -> FORMAT_DECODE",
+  "image": "scene_017.png",
+  "manifest": "scene_017.manifest.json",
+  "signature": "scene_017.manifest.sig"
+}

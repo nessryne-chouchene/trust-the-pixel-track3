@@ -1,0 +1,11 @@
+{
+  "image_id": null,
+  "format_valid": true,
+  "signature_valid": false,
+  "metadata_valid": null,
+  "replay_detected": false,
+  "security_status": "FAILED",
+  "reason_codes": [
+    "MANIFEST_INVALID"
+  ]
+}

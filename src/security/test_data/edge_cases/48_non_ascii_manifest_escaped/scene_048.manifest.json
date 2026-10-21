@@ -1,0 +1,17 @@
+{
+  "manifest_version": 1,
+  "image_id": "scene_048",
+  "file_name": "scene_048.png",
+  "sha256": "d5b75903f87f9b7d8cd357c01cdbe6fbb2d085c416143033437c34222938dace",
+  "size_bytes": 8623,
+  "metadata": {
+    "timestamp": "2026-10-13T03:00:00Z",
+    "sensor_id": "SAT-ALPHA-01",
+    "latitude": 34.74,
+    "longitude": 10.76,
+    "site_name": "Site d\u2019essai \u2013 zone c\u00f4ti\u00e8re, \u0645\u0646\u0637\u0642\u0629 \u0627\u062e\u062a\u0628\u0627\u0631"
+  },
+  "key_id": "sat-alpha-2026a",
+  "nonce": "f1c95d345b2aa7f8839064e5470f7696",
+  "signed_at": "2026-10-13T03:05:00Z"
+}

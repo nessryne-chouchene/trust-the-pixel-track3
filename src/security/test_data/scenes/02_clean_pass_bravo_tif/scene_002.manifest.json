@@ -1,0 +1,16 @@
+{
+  "manifest_version": 1,
+  "image_id": "scene_002",
+  "file_name": "scene_002.tif",
+  "sha256": "dc5055282156dfe4642edb2c327ff363514b9b80c0e6117facee271da9306d09",
+  "size_bytes": 196748,
+  "metadata": {
+    "timestamp": "2026-10-13T02:00:00Z",
+    "sensor_id": "SAT-BRAVO-01",
+    "latitude": 34.7406,
+    "longitude": 10.7603
+  },
+  "key_id": "sat-bravo-2026a",
+  "nonce": "d3bc760ef1ba8608cd9c9d596c38c800",
+  "signed_at": "2026-10-13T02:05:00Z"
+}

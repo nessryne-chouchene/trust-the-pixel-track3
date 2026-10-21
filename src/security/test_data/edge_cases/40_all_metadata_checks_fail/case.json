@@ -1,0 +1,9 @@
+{
+  "case_id": "40_all_metadata_checks_fail",
+  "group": "edge_cases",
+  "description": "Several metadata failures at once; codes must follow guide 4.3 order.",
+  "spec_reference": "guide 4.3 / 5.1 reason-code order",
+  "image": "scene_040.png",
+  "manifest": "scene_040.manifest.json",
+  "signature": "scene_040.manifest.sig"
+}

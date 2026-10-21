@@ -1,0 +1,9 @@
+{
+  "case_id": "05_forged_signature",
+  "group": "scenes",
+  "description": "Claims sat-alpha-2026a but signed with the attacker's key.",
+  "spec_reference": "guide 7.3 scene 05",
+  "image": "scene_005.png",
+  "manifest": "scene_005.manifest.json",
+  "signature": "scene_005.manifest.sig"
+}

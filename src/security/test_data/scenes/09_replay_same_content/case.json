@@ -1,0 +1,9 @@
+{
+  "case_id": "09_replay_same_content",
+  "group": "scenes",
+  "description": "Fresh image_id, but the bytes of the picture accepted as scene_099.",
+  "spec_reference": "guide 7.3 scene 09",
+  "image": "scene_009.png",
+  "manifest": "scene_009.manifest.json",
+  "signature": "scene_009.manifest.sig"
+}

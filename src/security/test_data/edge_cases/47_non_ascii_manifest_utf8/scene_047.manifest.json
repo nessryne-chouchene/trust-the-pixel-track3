@@ -1,0 +1,17 @@
+{
+  "manifest_version": 1,
+  "image_id": "scene_047",
+  "file_name": "scene_047.png",
+  "sha256": "e7f489f78c6e5e281b7804f1816072f26a25ed8563d6a7953dfc37ac848cb789",
+  "size_bytes": 12284,
+  "metadata": {
+    "timestamp": "2026-10-13T03:00:00Z",
+    "sensor_id": "SAT-ALPHA-01",
+    "latitude": 34.74,
+    "longitude": 10.76,
+    "site_name": "Site d’essai – zone côtière, منطقة اختبار"
+  },
+  "key_id": "sat-alpha-2026a",
+  "nonce": "da430b9e759a6d112eefd77aefcc887e",
+  "signed_at": "2026-10-13T03:05:00Z"
+}

@@ -1,0 +1,9 @@
+{
+  "case_id": "12_fake_format",
+  "group": "scenes",
+  "description": "60-byte text file renamed to .png; manifest and signature consistent with it.",
+  "spec_reference": "guide 7.3 scene 12",
+  "image": "scene_012.png",
+  "manifest": "scene_012.manifest.json",
+  "signature": "scene_012.manifest.sig"
+}

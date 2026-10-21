@@ -1,0 +1,9 @@
+{
+  "case_id": "14_empty_file",
+  "group": "edge_cases",
+  "description": "Zero-byte .png (below policy.min_file_size_bytes).",
+  "spec_reference": "guide 10 stretch goal: reject empty files -> FORMAT_SIZE (documented choice)",
+  "image": "scene_014.png",
+  "manifest": "scene_014.manifest.json",
+  "signature": "scene_014.manifest.sig"
+}

@@ -1,0 +1,1703 @@
+{
+  "summary": {
+    "dataset": "test_data",
+    "total": 53,
+    "passed": 53,
+    "failed": 0,
+    "success_rate_percent": 100.0,
+    "by_group": {
+      "scenes": {
+        "total": 13,
+        "passed": 13
+      },
+      "edge_cases": {
+        "total": 35,
+        "passed": 35
+      },
+      "invariants": {
+        "total": 5,
+        "passed": 5
+      }
+    },
+    "failed_cases": [],
+    "reference_time": "2026-10-13T12:00:00Z",
+    "policy_version": "2026.10-demo",
+    "module_version": "1.0.1",
+    "python": "3.12.10",
+    "run_at_utc": "2026-10-21T16:56:24Z",
+    "note": "Synthetic provenance/integrity tests only; they say nothing about detecting visual manipulation in real satellite imagery."
+  },
+  "results": [
+    {
+      "case_id": "01_clean_pass",
+      "group": "scenes",
+      "description": "Clean PNG signed by sat-alpha-2026a.",
+      "expected": {
+        "image_id": "scene_001",
+        "format_valid": true,
+        "signature_valid": true,
+        "metadata_valid": true,
+        "replay_detected": false,
+        "security_status": "PASSED",
+        "reason_codes": []
+      },
+      "spec_reference": "guide 7.3 scene 01",
+      "policy_override": null,
+      "actual": {
+        "image_id": "scene_001",
+        "format_valid": true,
+        "signature_valid": true,
+        "metadata_valid": true,
+        "replay_detected": false,
+        "security_status": "PASSED",
+        "reason_codes": []
+      },
+      "reasons": [],
+      "mismatches": [],
+      "passed": true
+    },
+    {
+      "case_id": "02_clean_pass_bravo_tif",
+      "group": "scenes",
+      "description": "Clean uncompressed TIFF signed by a second key for its own sensor.",
+      "expected": {
+        "image_id": "scene_002",
+        "format_valid": true,
+        "signature_valid": true,
+        "metadata_valid": true,
+        "replay_detected": false,
+        "security_status": "PASSED",
+        "reason_codes": []
+      },
+      "spec_reference": "guide 7.3 scene 02",
+      "policy_override": null,
+      "actual": {
+        "image_id": "scene_002",
+        "format_valid": true,
+        "signature_valid": true,
+        "metadata_valid": true,
+        "replay_detected": false,
+        "security_status": "PASSED",
+        "reason_codes": []
+      },
+      "reasons": [],
+      "mismatches": [],
+      "passed": true
+    },
+    {
+      "case_id": "03_image_tampered",
+      "group": "scenes",
+      "description": "Image pixels changed after signing; manifest and signature intact.",
+      "expected": {
+        "image_id": "scene_003",
+        "format_valid": true,
+        "signature_valid": false,
+        "metadata_valid": true,
+        "replay_detected": false,
+        "security_status": "FAILED",
+        "reason_codes": [
+          "HASH_MISMATCH"
+        ]
+      },
+      "spec_reference": "guide 7.3 scene 03",
+      "policy_override": null,
+      "actual": {
+        "image_id": "scene_003",
+        "format_valid": true,
+        "signature_valid": false,
+        "metadata_valid": true,
+        "replay_detected": false,
+        "security_status": "FAILED",
+        "reason_codes": [
+          "HASH_MISMATCH"
+        ]
+      },
+      "reasons": [
+        "HASH_MISMATCH: image SHA-256 d895bc2c96e1d18e35badccb6abd20ae728d3158910234e5fc1cee9cc0d88b82 != signed faba964955c9688f7b835686d3a9933e0da9c4dec1d16ae31f1703743db518b7"
+      ],
+      "mismatches": [],
+      "passed": true
+    },
+    {
+      "case_id": "04_manifest_tampered",
+      "group": "scenes",
+      "description": "Manifest latitude edited after signing.",
+      "expected": {
+        "image_id": "scene_004",
+        "format_valid": true,
+        "signature_valid": false,
+        "metadata_valid": true,
+        "replay_detected": false,
+        "security_status": "FAILED",
+        "reason_codes": [
+          "SIG_INVALID"
+        ]
+      },
+      "spec_reference": "guide 7.3 scene 04",
+      "policy_override": null,
+      "actual": {
+        "image_id": "scene_004",
+        "format_valid": true,
+        "signature_valid": false,
+        "metadata_valid": true,
+        "replay_detected": false,
+        "security_status": "FAILED",
+        "reason_codes": [
+          "SIG_INVALID"
+        ]
+      },
+      "reasons": [
+        "SIG_INVALID: Ed25519 signature does not verify against the manifest"
+      ],
+      "mismatches": [],
+      "passed": true
+    },
+    {
+      "case_id": "05_forged_signature",
+      "group": "scenes",
+      "description": "Claims sat-alpha-2026a but signed with the attacker's key.",
+      "expected": {
+        "image_id": "scene_005",
+        "format_valid": true,
+        "signature_valid": false,
+        "metadata_valid": true,
+        "replay_detected": false,
+        "security_status": "FAILED",
+        "reason_codes": [
+          "SIG_INVALID"
+        ]
+      },
+      "spec_reference": "guide 7.3 scene 05",
+      "policy_override": null,
+      "actual": {
+        "image_id": "scene_005",
+        "format_valid": true,
+        "signature_valid": false,
+        "metadata_valid": true,
+        "replay_detected": false,
+        "security_status": "FAILED",
+        "reason_codes": [
+          "SIG_INVALID"
+        ]
+      },
+      "reasons": [
+        "SIG_INVALID: Ed25519 signature does not verify against the manifest"
+      ],
+      "mismatches": [],
+      "passed": true
+    },
+    {
+      "case_id": "06_unknown_key",
+      "group": "scenes",
+      "description": "Correctly signed by sat-rogue-99, which is not in the trust store. Sensor exists elsewhere in the store, so metadata is valid.",
+      "expected": {
+        "image_id": "scene_006",
+        "format_valid": true,
+        "signature_valid": false,
+        "metadata_valid": true,
+        "replay_detected": false,
+        "security_status": "FAILED",
+        "reason_codes": [
+          "KEY_UNKNOWN"
+        ]
+      },
+      "spec_reference": "guide 7.3 scene 06",
+      "policy_override": null,
+      "actual": {
+        "image_id": "scene_006",
+        "format_valid": true,
+        "signature_valid": false,
+        "metadata_valid": true,
+        "replay_detected": false,
+        "security_status": "FAILED",
+        "reason_codes": [
+          "KEY_UNKNOWN"
+        ]
+      },
+      "reasons": [
+        "KEY_UNKNOWN: key_id 'sat-rogue-99' is not in the trust store"
+      ],
+      "mismatches": [],
+      "passed": true
+    },
+    {
+      "case_id": "07_revoked_key",
+      "group": "scenes",
+      "description": "Mathematically valid signature from the revoked key sat-alpha-2025x.",
+      "expected": {
+        "image_id": "scene_007",
+        "format_valid": true,
+        "signature_valid": false,
+        "metadata_valid": true,
+        "replay_detected": false,
+        "security_status": "FAILED",
+        "reason_codes": [
+          "KEY_REVOKED"
+        ]
+      },
+      "spec_reference": "guide 7.3 scene 07",
+      "policy_override": null,
+      "actual": {
+        "image_id": "scene_007",
+        "format_valid": true,
+        "signature_valid": false,
+        "metadata_valid": true,
+        "replay_detected": false,
+        "security_status": "FAILED",
+        "reason_codes": [
+          "KEY_REVOKED"
+        ]
+      },
+      "reasons": [
+        "KEY_REVOKED: key 'sat-alpha-2025x' has status 'revoked'"
+      ],
+      "mismatches": [],
+      "passed": true
+    },
+    {
+      "case_id": "08_replay_same_id",
+      "group": "scenes",
+      "description": "New picture reusing the already-accepted image_id scene_099.",
+      "expected": {
+        "image_id": "scene_099",
+        "format_valid": true,
+        "signature_valid": true,
+        "metadata_valid": true,
+        "replay_detected": true,
+        "security_status": "FAILED",
+        "reason_codes": [
+          "REPLAY_ID"
+        ]
+      },
+      "spec_reference": "guide 7.3 scene 08",
+      "policy_override": null,
+      "actual": {
+        "image_id": "scene_099",
+        "format_valid": true,
+        "signature_valid": true,
+        "metadata_valid": true,
+        "replay_detected": true,
+        "security_status": "FAILED",
+        "reason_codes": [
+          "REPLAY_ID"
+        ]
+      },
+      "reasons": [
+        "REPLAY_ID: image_id 'scene_099' was already accepted"
+      ],
+      "mismatches": [],
+      "passed": true
+    },
+    {
+      "case_id": "09_replay_same_content",
+      "group": "scenes",
+      "description": "Fresh image_id, but the bytes of the picture accepted as scene_099.",
+      "expected": {
+        "image_id": "scene_009",
+        "format_valid": true,
+        "signature_valid": true,
+        "metadata_valid": true,
+        "replay_detected": true,
+        "security_status": "FAILED",
+        "reason_codes": [
+          "REPLAY_CONTENT"
+        ]
+      },
+      "spec_reference": "guide 7.3 scene 09",
+      "policy_override": null,
+      "actual": {
+        "image_id": "scene_009",
+        "format_valid": true,
+        "signature_valid": true,
+        "metadata_valid": true,
+        "replay_detected": true,
+        "security_status": "FAILED",
+        "reason_codes": [
+          "REPLAY_CONTENT"
+        ]
+      },
+      "reasons": [
+        "REPLAY_CONTENT: identical image bytes were already accepted"
+      ],
+      "mismatches": [],
+      "passed": true
+    },
+    {
+      "case_id": "10_bad_metadata_review",
+      "group": "scenes",
+      "description": "Valid signature; latitude out of range and sensor not allowed for the key.",
+      "expected": {
+        "image_id": "scene_010",
+        "format_valid": true,
+        "signature_valid": true,
+        "metadata_valid": false,
+        "replay_detected": false,
+        "security_status": "REVIEW",
+        "reason_codes": [
+          "META_LATITUDE",
+          "META_SENSOR"
+        ]
+      },
+      "spec_reference": "guide 7.3 scene 10",
+      "policy_override": null,
+      "actual": {
+        "image_id": "scene_010",
+        "format_valid": true,
+        "signature_valid": true,
+        "metadata_valid": false,
+        "replay_detected": false,
+        "security_status": "REVIEW",
+        "reason_codes": [
+          "META_LATITUDE",
+          "META_SENSOR"
+        ]
+      },
+      "reasons": [
+        "META_LATITUDE: latitude 123.4 is not a number in [-90, 90]",
+        "META_SENSOR: sensor 'SAT-UNKNOWN' not allowed for key 'sat-alpha-2026a'"
+      ],
+      "mismatches": [],
+      "passed": true
+    },
+    {
+      "case_id": "11_stale_timestamp_review",
+      "group": "scenes",
+      "description": "Observation 100 h old (limit 72 h).",
+      "expected": {
+        "image_id": "scene_011",
+        "format_valid": true,
+        "signature_valid": true,
+        "metadata_valid": false,
+        "replay_detected": false,
+        "security_status": "REVIEW",
+        "reason_codes": [
+          "META_TIME_STALE"
+        ]
+      },
+      "spec_reference": "guide 7.3 scene 11",
+      "policy_override": null,
+      "actual": {
+        "image_id": "scene_011",
+        "format_valid": true,
+        "signature_valid": true,
+        "metadata_valid": false,
+        "replay_detected": false,
+        "security_status": "REVIEW",
+        "reason_codes": [
+          "META_TIME_STALE"
+        ]
+      },
+      "reasons": [
+        "META_TIME_STALE: observation is 100.0 h old, limit 72 h"
+      ],
+      "mismatches": [],
+      "passed": true
+    },
+    {
+      "case_id": "12_fake_format",
+      "group": "scenes",
+      "description": "60-byte text file renamed to .png; manifest and signature consistent with it.",
+      "expected": {
+        "image_id": "scene_012",
+        "format_valid": false,
+        "signature_valid": null,
+        "metadata_valid": null,
+        "replay_detected": null,
+        "security_status": "FAILED",
+        "reason_codes": [
+          "FORMAT_MAGIC"
+        ]
+      },
+      "spec_reference": "guide 7.3 scene 12",
+      "policy_override": null,
+      "actual": {
+        "image_id": "scene_012",
+        "format_valid": false,
+        "signature_valid": null,
+        "metadata_valid": null,
+        "replay_detected": null,
+        "security_status": "FAILED",
+        "reason_codes": [
+          "FORMAT_MAGIC"
+        ]
+      },
+      "reasons": [
+        "FORMAT_MAGIC: magic bytes 517561727465726c do not match .png"
+      ],
+      "mismatches": [],
+      "passed": true
+    },
+    {
+      "case_id": "13_missing_signature",
+      "group": "scenes",
+      "description": "Image and manifest present, no .manifest.sig file.",
+      "expected": {
+        "image_id": "scene_013",
+        "format_valid": true,
+        "signature_valid": false,
+        "metadata_valid": true,
+        "replay_detected": false,
+        "security_status": "FAILED",
+        "reason_codes": [
+          "SIG_MISSING"
+        ]
+      },
+      "spec_reference": "guide 7.3 scene 13",
+      "policy_override": null,
+      "actual": {
+        "image_id": "scene_013",
+        "format_valid": true,
+        "signature_valid": false,
+        "metadata_valid": true,
+        "replay_detected": false,
+        "security_status": "FAILED",
+        "reason_codes": [
+          "SIG_MISSING"
+        ]
+      },
+      "reasons": [
+        "SIG_MISSING: detached signature file not found"
+      ],
+      "mismatches": [],
+      "passed": true
+    },
+    {
+      "case_id": "14_empty_file",
+      "group": "edge_cases",
+      "description": "Zero-byte .png (below policy.min_file_size_bytes).",
+      "expected": {
+        "image_id": "scene_014",
+        "format_valid": false,
+        "signature_valid": null,
+        "metadata_valid": null,
+        "replay_detected": null,
+        "security_status": "FAILED",
+        "reason_codes": [
+          "FORMAT_SIZE"
+        ]
+      },
+      "spec_reference": "guide 10 stretch goal: reject empty files -> FORMAT_SIZE (documented choice)",
+      "policy_override": null,
+      "actual": {
+        "image_id": "scene_014",
+        "format_valid": false,
+        "signature_valid": null,
+        "metadata_valid": null,
+        "replay_detected": null,
+        "security_status": "FAILED",
+        "reason_codes": [
+          "FORMAT_SIZE"
+        ]
+      },
+      "reasons": [
+        "FORMAT_SIZE: file size 0 B outside [1, 104857600] B"
+      ],
+      "mismatches": [],
+      "passed": true
+    },
+    {
+      "case_id": "15_truncated_png",
+      "group": "edge_cases",
+      "description": "PNG cut to 60 % of its length; header parses, full decode fails.",
+      "expected": {
+        "image_id": "scene_015",
+        "format_valid": false,
+        "signature_valid": null,
+        "metadata_valid": null,
+        "replay_detected": null,
+        "security_status": "FAILED",
+        "reason_codes": [
+          "FORMAT_DECODE"
+        ]
+      },
+      "spec_reference": "guide 4.1 'full decode succeeds' -> FORMAT_DECODE",
+      "policy_override": null,
+      "actual": {
+        "image_id": "scene_015",
+        "format_valid": false,
+        "signature_valid": null,
+        "metadata_valid": null,
+        "replay_detected": null,
+        "security_status": "FAILED",
+        "reason_codes": [
+          "FORMAT_DECODE"
+        ]
+      },
+      "reasons": [
+        "FORMAT_DECODE: full decode failed: OSError: image file is truncated"
+      ],
+      "mismatches": [],
+      "passed": true
+    },
+    {
+      "case_id": "16_disallowed_extension",
+      "group": "edge_cases",
+      "description": "Valid BMP image; bmp is not in allowed_formats.",
+      "expected": {
+        "image_id": "scene_016",
+        "format_valid": false,
+        "signature_valid": null,
+        "metadata_valid": null,
+        "replay_detected": null,
+        "security_status": "FAILED",
+        "reason_codes": [
+          "FORMAT_EXTENSION"
+        ]
+      },
+      "spec_reference": "guide 4.1 FORMAT_EXTENSION",
+      "policy_override": null,
+      "actual": {
+        "image_id": "scene_016",
+        "format_valid": false,
+        "signature_valid": null,
+        "metadata_valid": null,
+        "replay_detected": null,
+        "security_status": "FAILED",
+        "reason_codes": [
+          "FORMAT_EXTENSION"
+        ]
+      },
+      "reasons": [
+        "FORMAT_EXTENSION: extension '.bmp' not in allowed_formats ['jpg', 'png', 'tif']"
+      ],
+      "mismatches": [],
+      "passed": true
+    },
+    {
+      "case_id": "17_png_magic_garbage",
+      "group": "edge_cases",
+      "description": "Correct PNG magic followed by random bytes; the image library cannot open it.",
+      "expected": {
+        "image_id": "scene_017",
+        "format_valid": false,
+        "signature_valid": null,
+        "metadata_valid": null,
+        "replay_detected": null,
+        "security_status": "FAILED",
+        "reason_codes": [
+          "FORMAT_DECODE"
+        ]
+      },
+      "spec_reference": "guide 4.1 'image library reports the same format' -> FORMAT_DECODE",
+      "policy_override": null,
+      "actual": {
+        "image_id": "scene_017",
+        "format_valid": false,
+        "signature_valid": null,
+        "metadata_valid": null,
+        "replay_detected": null,
+        "security_status": "FAILED",
+        "reason_codes": [
+          "FORMAT_DECODE"
+        ]
+      },
+      "reasons": [
+        "FORMAT_DECODE: image library cannot open file as ('PNG',): UnidentifiedImageError: cannot identify image file <_io.BytesIO object>"
+      ],
+      "mismatches": [],
+      "passed": true
+    },
+    {
+      "case_id": "18_oversized_file",
+      "group": "edge_cases",
+      "description": "Normal PNG (several KB) assessed with max_file_size_mb = 0.001 (~1 KB) to avoid a 100 MB fixture.",
+      "expected": {
+        "image_id": "scene_018",
+        "format_valid": false,
+        "signature_valid": null,
+        "metadata_valid": null,
+        "replay_detected": null,
+        "security_status": "FAILED",
+        "reason_codes": [
+          "FORMAT_SIZE"
+        ]
+      },
+      "spec_reference": "guide 4.1 FORMAT_SIZE",
+      "policy_override": {
+        "max_file_size_mb": 0.001
+      },
+      "actual": {
+        "image_id": "scene_018",
+        "format_valid": false,
+        "signature_valid": null,
+        "metadata_valid": null,
+        "replay_detected": null,
+        "security_status": "FAILED",
+        "reason_codes": [
+          "FORMAT_SIZE"
+        ]
+      },
+      "reasons": [
+        "FORMAT_SIZE: file size 10229 B outside [1, 1048] B"
+      ],
+      "mismatches": [],
+      "passed": true
+    },
+    {
+      "case_id": "19_excessive_dimensions",
+      "group": "edge_cases",
+      "description": "Decodable 7000x6000 (42 Mpx) 1-bit PNG, a few KB on disk; limit is 40 Mpx.",
+      "expected": {
+        "image_id": "scene_019",
+        "format_valid": false,
+        "signature_valid": null,
+        "metadata_valid": null,
+        "replay_detected": null,
+        "security_status": "FAILED",
+        "reason_codes": [
+          "FORMAT_DIMENSIONS"
+        ]
+      },
+      "spec_reference": "guide 4.1 FORMAT_DIMENSIONS",
+      "policy_override": null,
+      "actual": {
+        "image_id": "scene_019",
+        "format_valid": false,
+        "signature_valid": null,
+        "metadata_valid": null,
+        "replay_detected": null,
+        "security_status": "FAILED",
+        "reason_codes": [
+          "FORMAT_DIMENSIONS"
+        ]
+      },
+      "reasons": [
+        "FORMAT_DIMENSIONS: 7000x6000 = 42000000 px exceeds max_pixels 40000000"
+      ],
+      "mismatches": [],
+      "passed": true
+    },
+    {
+      "case_id": "20_decompression_bomb_header",
+      "group": "edge_cases",
+      "description": "Tiny PNG whose IHDR claims 100000x100000 px; must be rejected from the header.",
+      "expected": {
+        "image_id": "scene_020",
+        "format_valid": false,
+        "signature_valid": null,
+        "metadata_valid": null,
+        "replay_detected": null,
+        "security_status": "FAILED",
+        "reason_codes": [
+          "FORMAT_DIMENSIONS"
+        ]
+      },
+      "spec_reference": "guide 4.1 FORMAT_DIMENSIONS (decompression bomb guard)",
+      "policy_override": null,
+      "actual": {
+        "image_id": "scene_020",
+        "format_valid": false,
+        "signature_valid": null,
+        "metadata_valid": null,
+        "replay_detected": null,
+        "security_status": "FAILED",
+        "reason_codes": [
+          "FORMAT_DIMENSIONS"
+        ]
+      },
+      "reasons": [
+        "FORMAT_DIMENSIONS: decompression bomb guard: DecompressionBombError: Image size (10000000000 pixels) exceeds limit of 178956970 pixels, could be decompression bomb DOS attack."
+      ],
+      "mismatches": [],
+      "passed": true
+    },
+    {
+      "case_id": "21_jpeg_renamed_png",
+      "group": "edge_cases",
+      "description": "Real JPEG saved with a .png extension.",
+      "expected": {
+        "image_id": "scene_021",
+        "format_valid": false,
+        "signature_valid": null,
+        "metadata_valid": null,
+        "replay_detected": null,
+        "security_status": "FAILED",
+        "reason_codes": [
+          "FORMAT_MAGIC"
+        ]
+      },
+      "spec_reference": "guide 4.1 FORMAT_MAGIC",
+      "policy_override": null,
+      "actual": {
+        "image_id": "scene_021",
+        "format_valid": false,
+        "signature_valid": null,
+        "metadata_valid": null,
+        "replay_detected": null,
+        "security_status": "FAILED",
+        "reason_codes": [
+          "FORMAT_MAGIC"
+        ]
+      },
+      "reasons": [
+        "FORMAT_MAGIC: magic bytes ffd8ffe000104a46 do not match .png"
+      ],
+      "mismatches": [],
+      "passed": true
+    },
+    {
+      "case_id": "22_malformed_manifest_json",
+      "group": "edge_cases",
+      "description": "Truncated, unparseable manifest JSON. No manifest object, so metadata cannot run (null).",
+      "expected": {
+        "image_id": null,
+        "format_valid": true,
+        "signature_valid": false,
+        "metadata_valid": null,
+        "replay_detected": false,
+        "security_status": "FAILED",
+        "reason_codes": [
+          "MANIFEST_INVALID"
+        ]
+      },
+      "spec_reference": "guide 4.2 MANIFEST_INVALID; null-when-not-run rule (documented choice)",
+      "policy_override": null,
+      "actual": {
+        "image_id": null,
+        "format_valid": true,
+        "signature_valid": false,
+        "metadata_valid": null,
+        "replay_detected": false,
+        "security_status": "FAILED",
+        "reason_codes": [
+          "MANIFEST_INVALID"
+        ]
+      },
+      "reasons": [
+        "MANIFEST_INVALID: manifest is not valid JSON: JSONDecodeError: Expecting value: line 1 column 63 (char 62)"
+      ],
+      "mismatches": [],
+      "passed": true
+    },
+    {
+      "case_id": "23_manifest_missing_field",
+      "group": "edge_cases",
+      "description": "Validly signed manifest without the required 'nonce' field.",
+      "expected": {
+        "image_id": "scene_023",
+        "format_valid": true,
+        "signature_valid": false,
+        "metadata_valid": true,
+        "replay_detected": false,
+        "security_status": "FAILED",
+        "reason_codes": [
+          "MANIFEST_INVALID"
+        ]
+      },
+      "spec_reference": "guide 4.2 MANIFEST_INVALID",
+      "policy_override": null,
+      "actual": {
+        "image_id": "scene_023",
+        "format_valid": true,
+        "signature_valid": false,
+        "metadata_valid": true,
+        "replay_detected": false,
+        "security_status": "FAILED",
+        "reason_codes": [
+          "MANIFEST_INVALID"
+        ]
+      },
+      "reasons": [
+        "MANIFEST_INVALID: missing field 'nonce'"
+      ],
+      "mismatches": [],
+      "passed": true
+    },
+    {
+      "case_id": "24_manifest_bad_version",
+      "group": "edge_cases",
+      "description": "Validly signed manifest with manifest_version 2.",
+      "expected": {
+        "image_id": "scene_024",
+        "format_valid": true,
+        "signature_valid": false,
+        "metadata_valid": true,
+        "replay_detected": false,
+        "security_status": "FAILED",
+        "reason_codes": [
+          "MANIFEST_INVALID"
+        ]
+      },
+      "spec_reference": "guide 3.6 'Must be 1' -> MANIFEST_INVALID",
+      "policy_override": null,
+      "actual": {
+        "image_id": "scene_024",
+        "format_valid": true,
+        "signature_valid": false,
+        "metadata_valid": true,
+        "replay_detected": false,
+        "security_status": "FAILED",
+        "reason_codes": [
+          "MANIFEST_INVALID"
+        ]
+      },
+      "reasons": [
+        "MANIFEST_INVALID: manifest_version must be 1, got 2"
+      ],
+      "mismatches": [],
+      "passed": true
+    },
+    {
+      "case_id": "25_manifest_duplicate_keys",
+      "group": "edge_cases",
+      "description": "Manifest text repeats the image_id key with two values; ambiguous, so rejected.",
+      "expected": {
+        "image_id": null,
+        "format_valid": true,
+        "signature_valid": false,
+        "metadata_valid": null,
+        "replay_detected": false,
+        "security_status": "FAILED",
+        "reason_codes": [
+          "MANIFEST_INVALID"
+        ]
+      },
+      "spec_reference": "implementation hardening (documented): duplicate JSON keys -> MANIFEST_INVALID",
+      "policy_override": null,
+      "actual": {
+        "image_id": null,
+        "format_valid": true,
+        "signature_valid": false,
+        "metadata_valid": null,
+        "replay_detected": false,
+        "security_status": "FAILED",
+        "reason_codes": [
+          "MANIFEST_INVALID"
+        ]
+      },
+      "reasons": [
+        "MANIFEST_INVALID: manifest is not valid JSON: ValueError: duplicate JSON key 'image_id'"
+      ],
+      "mismatches": [],
+      "passed": true
+    },
+    {
+      "case_id": "26_missing_manifest_file",
+      "group": "edge_cases",
+      "description": "No manifest file at all.",
+      "expected": {
+        "image_id": null,
+        "format_valid": true,
+        "signature_valid": false,
+        "metadata_valid": null,
+        "replay_detected": false,
+        "security_status": "FAILED",
+        "reason_codes": [
+          "MANIFEST_INVALID"
+        ]
+      },
+      "spec_reference": "guide 4.2 'manifest unreadable' -> MANIFEST_INVALID",
+      "policy_override": null,
+      "actual": {
+        "image_id": null,
+        "format_valid": true,
+        "signature_valid": false,
+        "metadata_valid": null,
+        "replay_detected": false,
+        "security_status": "FAILED",
+        "reason_codes": [
+          "MANIFEST_INVALID"
+        ]
+      },
+      "reasons": [
+        "MANIFEST_INVALID: manifest unreadable: No such file or directory"
+      ],
+      "mismatches": [],
+      "passed": true
+    },
+    {
+      "case_id": "27_invalid_base64_signature",
+      "group": "edge_cases",
+      "description": ".sig file exists but is not valid base64.",
+      "expected": {
+        "image_id": "scene_027",
+        "format_valid": true,
+        "signature_valid": false,
+        "metadata_valid": true,
+        "replay_detected": false,
+        "security_status": "FAILED",
+        "reason_codes": [
+          "SIG_INVALID"
+        ]
+      },
+      "spec_reference": "guide 10 stretch goal; decoded in the verify step -> SIG_INVALID (documented choice)",
+      "policy_override": null,
+      "actual": {
+        "image_id": "scene_027",
+        "format_valid": true,
+        "signature_valid": false,
+        "metadata_valid": true,
+        "replay_detected": false,
+        "security_status": "FAILED",
+        "reason_codes": [
+          "SIG_INVALID"
+        ]
+      },
+      "reasons": [
+        "SIG_INVALID: signature unusable: Error: Only base64 data is allowed"
+      ],
+      "mismatches": [],
+      "passed": true
+    },
+    {
+      "case_id": "28_signature_wrong_length",
+      "group": "edge_cases",
+      "description": "Valid base64 but only 32 bytes (an Ed25519 signature is 64).",
+      "expected": {
+        "image_id": "scene_028",
+        "format_valid": true,
+        "signature_valid": false,
+        "metadata_valid": true,
+        "replay_detected": false,
+        "security_status": "FAILED",
+        "reason_codes": [
+          "SIG_INVALID"
+        ]
+      },
+      "spec_reference": "guide 3.6 / 4.2 SIG_INVALID",
+      "policy_override": null,
+      "actual": {
+        "image_id": "scene_028",
+        "format_valid": true,
+        "signature_valid": false,
+        "metadata_valid": true,
+        "replay_detected": false,
+        "security_status": "FAILED",
+        "reason_codes": [
+          "SIG_INVALID"
+        ]
+      },
+      "reasons": [
+        "SIG_INVALID: signature unusable: ValueError: decoded signature is 32 bytes, expected 64"
+      ],
+      "mismatches": [],
+      "passed": true
+    },
+    {
+      "case_id": "29_key_expired",
+      "group": "edge_cases",
+      "description": "Active key valid 2024-01-01..2025-01-01 used to sign on 2026-10-13.",
+      "expected": {
+        "image_id": "scene_029",
+        "format_valid": true,
+        "signature_valid": false,
+        "metadata_valid": true,
+        "replay_detected": false,
+        "security_status": "FAILED",
+        "reason_codes": [
+          "KEY_NOT_VALID"
+        ]
+      },
+      "spec_reference": "guide 4.2 KEY_NOT_VALID",
+      "policy_override": null,
+      "actual": {
+        "image_id": "scene_029",
+        "format_valid": true,
+        "signature_valid": false,
+        "metadata_valid": true,
+        "replay_detected": false,
+        "security_status": "FAILED",
+        "reason_codes": [
+          "KEY_NOT_VALID"
+        ]
+      },
+      "reasons": [
+        "KEY_NOT_VALID: signed_at '2026-10-13T03:05:00Z' not inside 2024-01-01T00:00:00Z .. 2025-01-01T00:00:00Z"
+      ],
+      "mismatches": [],
+      "passed": true
+    },
+    {
+      "case_id": "30_key_not_yet_valid",
+      "group": "edge_cases",
+      "description": "Active key valid from 2027-01-01 used to sign on 2026-10-13.",
+      "expected": {
+        "image_id": "scene_030",
+        "format_valid": true,
+        "signature_valid": false,
+        "metadata_valid": true,
+        "replay_detected": false,
+        "security_status": "FAILED",
+        "reason_codes": [
+          "KEY_NOT_VALID"
+        ]
+      },
+      "spec_reference": "guide 4.2 KEY_NOT_VALID",
+      "policy_override": null,
+      "actual": {
+        "image_id": "scene_030",
+        "format_valid": true,
+        "signature_valid": false,
+        "metadata_valid": true,
+        "replay_detected": false,
+        "security_status": "FAILED",
+        "reason_codes": [
+          "KEY_NOT_VALID"
+        ]
+      },
+      "reasons": [
+        "KEY_NOT_VALID: signed_at '2026-10-13T03:05:00Z' not inside 2027-01-01T00:00:00Z .. 2028-01-01T00:00:00Z"
+      ],
+      "mismatches": [],
+      "passed": true
+    },
+    {
+      "case_id": "31_signed_at_unparseable",
+      "group": "edge_cases",
+      "description": "signed_at is not ISO-8601, so it cannot be shown to lie in the key's validity period.",
+      "expected": {
+        "image_id": "scene_031",
+        "format_valid": true,
+        "signature_valid": false,
+        "metadata_valid": true,
+        "replay_detected": false,
+        "security_status": "FAILED",
+        "reason_codes": [
+          "KEY_NOT_VALID"
+        ]
+      },
+      "spec_reference": "guide 4.2 KEY_NOT_VALID (documented choice)",
+      "policy_override": null,
+      "actual": {
+        "image_id": "scene_031",
+        "format_valid": true,
+        "signature_valid": false,
+        "metadata_valid": true,
+        "replay_detected": false,
+        "security_status": "FAILED",
+        "reason_codes": [
+          "KEY_NOT_VALID"
+        ]
+      },
+      "reasons": [
+        "KEY_NOT_VALID: signed_at '13/10/2026 03:05' not inside 2026-01-01T00:00:00Z .. 2027-01-01T00:00:00Z"
+      ],
+      "mismatches": [],
+      "passed": true
+    },
+    {
+      "case_id": "32_metadata_missing_timestamp",
+      "group": "edge_cases",
+      "description": "Validly signed manifest whose metadata lacks 'timestamp'.",
+      "expected": {
+        "image_id": "scene_032",
+        "format_valid": true,
+        "signature_valid": true,
+        "metadata_valid": false,
+        "replay_detected": false,
+        "security_status": "REVIEW",
+        "reason_codes": [
+          "META_MISSING_FIELD"
+        ]
+      },
+      "spec_reference": "guide 4.3 META_MISSING_FIELD",
+      "policy_override": null,
+      "actual": {
+        "image_id": "scene_032",
+        "format_valid": true,
+        "signature_valid": true,
+        "metadata_valid": false,
+        "replay_detected": false,
+        "security_status": "REVIEW",
+        "reason_codes": [
+          "META_MISSING_FIELD"
+        ]
+      },
+      "reasons": [
+        "META_MISSING_FIELD: missing metadata fields: ['timestamp']"
+      ],
+      "mismatches": [],
+      "passed": true
+    },
+    {
+      "case_id": "33_invalid_longitude",
+      "group": "edge_cases",
+      "description": "Longitude 200.5 (range is +-180).",
+      "expected": {
+        "image_id": "scene_033",
+        "format_valid": true,
+        "signature_valid": true,
+        "metadata_valid": false,
+        "replay_detected": false,
+        "security_status": "REVIEW",
+        "reason_codes": [
+          "META_LONGITUDE"
+        ]
+      },
+      "spec_reference": "guide 4.3 META_LONGITUDE",
+      "policy_override": null,
+      "actual": {
+        "image_id": "scene_033",
+        "format_valid": true,
+        "signature_valid": true,
+        "metadata_valid": false,
+        "replay_detected": false,
+        "security_status": "REVIEW",
+        "reason_codes": [
+          "META_LONGITUDE"
+        ]
+      },
+      "reasons": [
+        "META_LONGITUDE: longitude 200.5 is not a number in [-180, 180]"
+      ],
+      "mismatches": [],
+      "passed": true
+    },
+    {
+      "case_id": "34_non_numeric_latitude",
+      "group": "edge_cases",
+      "description": "Latitude given as the string \"36.8\" instead of a number.",
+      "expected": {
+        "image_id": "scene_034",
+        "format_valid": true,
+        "signature_valid": true,
+        "metadata_valid": false,
+        "replay_detected": false,
+        "security_status": "REVIEW",
+        "reason_codes": [
+          "META_LATITUDE"
+        ]
+      },
+      "spec_reference": "guide 4.3 'is a number'",
+      "policy_override": null,
+      "actual": {
+        "image_id": "scene_034",
+        "format_valid": true,
+        "signature_valid": true,
+        "metadata_valid": false,
+        "replay_detected": false,
+        "security_status": "REVIEW",
+        "reason_codes": [
+          "META_LATITUDE"
+        ]
+      },
+      "reasons": [
+        "META_LATITUDE: latitude '36.8' is not a number in [-90, 90]"
+      ],
+      "mismatches": [],
+      "passed": true
+    },
+    {
+      "case_id": "35_future_timestamp",
+      "group": "edge_cases",
+      "description": "Observation 1 h after the reference time (skew tolerance 300 s).",
+      "expected": {
+        "image_id": "scene_035",
+        "format_valid": true,
+        "signature_valid": true,
+        "metadata_valid": false,
+        "replay_detected": false,
+        "security_status": "REVIEW",
+        "reason_codes": [
+          "META_TIME_FUTURE"
+        ]
+      },
+      "spec_reference": "guide 4.3 META_TIME_FUTURE",
+      "policy_override": null,
+      "actual": {
+        "image_id": "scene_035",
+        "format_valid": true,
+        "signature_valid": true,
+        "metadata_valid": false,
+        "replay_detected": false,
+        "security_status": "REVIEW",
+        "reason_codes": [
+          "META_TIME_FUTURE"
+        ]
+      },
+      "reasons": [
+        "META_TIME_FUTURE: timestamp 2026-10-13T13:00:00Z is later than now 2026-10-13T12:00:00Z + 300 s"
+      ],
+      "mismatches": [],
+      "passed": true
+    },
+    {
+      "case_id": "36_timestamp_within_clock_skew",
+      "group": "edge_cases",
+      "description": "Observation 4 min after the reference time; inside the 300 s skew, so accepted.",
+      "expected": {
+        "image_id": "scene_036",
+        "format_valid": true,
+        "signature_valid": true,
+        "metadata_valid": true,
+        "replay_detected": false,
+        "security_status": "PASSED",
+        "reason_codes": []
+      },
+      "spec_reference": "guide 3.3 clock_skew_seconds",
+      "policy_override": null,
+      "actual": {
+        "image_id": "scene_036",
+        "format_valid": true,
+        "signature_valid": true,
+        "metadata_valid": true,
+        "replay_detected": false,
+        "security_status": "PASSED",
+        "reason_codes": []
+      },
+      "reasons": [],
+      "mismatches": [],
+      "passed": true
+    },
+    {
+      "case_id": "37_invalid_timestamp_format",
+      "group": "edge_cases",
+      "description": "Timestamp uses a space and no 'Z'.",
+      "expected": {
+        "image_id": "scene_037",
+        "format_valid": true,
+        "signature_valid": true,
+        "metadata_valid": false,
+        "replay_detected": false,
+        "security_status": "REVIEW",
+        "reason_codes": [
+          "META_TIME_INVALID"
+        ]
+      },
+      "spec_reference": "guide 4.3 META_TIME_INVALID",
+      "policy_override": null,
+      "actual": {
+        "image_id": "scene_037",
+        "format_valid": true,
+        "signature_valid": true,
+        "metadata_valid": false,
+        "replay_detected": false,
+        "security_status": "REVIEW",
+        "reason_codes": [
+          "META_TIME_INVALID"
+        ]
+      },
+      "reasons": [
+        "META_TIME_INVALID: timestamp '2026-10-13 03:00:00' is not YYYY-MM-DDTHH:MM:SSZ"
+      ],
+      "mismatches": [],
+      "passed": true
+    },
+    {
+      "case_id": "38_filename_mismatch",
+      "group": "edge_cases",
+      "description": "Manifest names scene_038_original.png; the received file is scene_038.png.",
+      "expected": {
+        "image_id": "scene_038",
+        "format_valid": true,
+        "signature_valid": true,
+        "metadata_valid": false,
+        "replay_detected": false,
+        "security_status": "REVIEW",
+        "reason_codes": [
+          "META_FILENAME"
+        ]
+      },
+      "spec_reference": "guide 4.3 META_FILENAME",
+      "policy_override": null,
+      "actual": {
+        "image_id": "scene_038",
+        "format_valid": true,
+        "signature_valid": true,
+        "metadata_valid": false,
+        "replay_detected": false,
+        "security_status": "REVIEW",
+        "reason_codes": [
+          "META_FILENAME"
+        ]
+      },
+      "reasons": [
+        "META_FILENAME: manifest file_name 'scene_038_original.png' != actual 'scene_038.png'"
+      ],
+      "mismatches": [],
+      "passed": true
+    },
+    {
+      "case_id": "39_sensor_of_other_key",
+      "group": "edge_cases",
+      "description": "sat-alpha-2026a signs for SAT-BRAVO-01, which only the bravo key may speak for.",
+      "expected": {
+        "image_id": "scene_039",
+        "format_valid": true,
+        "signature_valid": true,
+        "metadata_valid": false,
+        "replay_detected": false,
+        "security_status": "REVIEW",
+        "reason_codes": [
+          "META_SENSOR"
+        ]
+      },
+      "spec_reference": "guide 3.2 allowed_sensors / 4.3 META_SENSOR",
+      "policy_override": null,
+      "actual": {
+        "image_id": "scene_039",
+        "format_valid": true,
+        "signature_valid": true,
+        "metadata_valid": false,
+        "replay_detected": false,
+        "security_status": "REVIEW",
+        "reason_codes": [
+          "META_SENSOR"
+        ]
+      },
+      "reasons": [
+        "META_SENSOR: sensor 'SAT-BRAVO-01' not allowed for key 'sat-alpha-2026a'"
+      ],
+      "mismatches": [],
+      "passed": true
+    },
+    {
+      "case_id": "40_all_metadata_checks_fail",
+      "group": "edge_cases",
+      "description": "Several metadata failures at once; codes must follow guide 4.3 order.",
+      "expected": {
+        "image_id": "scene_040",
+        "format_valid": true,
+        "signature_valid": true,
+        "metadata_valid": false,
+        "replay_detected": false,
+        "security_status": "REVIEW",
+        "reason_codes": [
+          "META_LATITUDE",
+          "META_LONGITUDE",
+          "META_SENSOR",
+          "META_TIME_STALE"
+        ]
+      },
+      "spec_reference": "guide 4.3 / 5.1 reason-code order",
+      "policy_override": null,
+      "actual": {
+        "image_id": "scene_040",
+        "format_valid": true,
+        "signature_valid": true,
+        "metadata_valid": false,
+        "replay_detected": false,
+        "security_status": "REVIEW",
+        "reason_codes": [
+          "META_LATITUDE",
+          "META_LONGITUDE",
+          "META_SENSOR",
+          "META_TIME_STALE"
+        ]
+      },
+      "reasons": [
+        "META_LATITUDE: latitude -91 is not a number in [-90, 90]",
+        "META_LONGITUDE: longitude -180.5 is not a number in [-180, 180]",
+        "META_SENSOR: sensor 'SAT-NOBODY' not allowed for key 'sat-alpha-2026a'",
+        "META_TIME_STALE: observation is 200.0 h old, limit 72 h"
+      ],
+      "mismatches": [],
+      "passed": true
+    },
+    {
+      "case_id": "41_unknown_key_unknown_sensor",
+      "group": "edge_cases",
+      "description": "Unknown key and a sensor that exists nowhere in the trust store.",
+      "expected": {
+        "image_id": "scene_041",
+        "format_valid": true,
+        "signature_valid": false,
+        "metadata_valid": false,
+        "replay_detected": false,
+        "security_status": "FAILED",
+        "reason_codes": [
+          "KEY_UNKNOWN",
+          "META_SENSOR"
+        ]
+      },
+      "spec_reference": "guide 7.3 scene 06 rule + 4.3 META_SENSOR",
+      "policy_override": null,
+      "actual": {
+        "image_id": "scene_041",
+        "format_valid": true,
+        "signature_valid": false,
+        "metadata_valid": false,
+        "replay_detected": false,
+        "security_status": "FAILED",
+        "reason_codes": [
+          "KEY_UNKNOWN",
+          "META_SENSOR"
+        ]
+      },
+      "reasons": [
+        "KEY_UNKNOWN: key_id 'sat-rogue-99' is not in the trust store",
+        "META_SENSOR: sensor 'SAT-ROGUE-X' not allowed for any trusted key"
+      ],
+      "mismatches": [],
+      "passed": true
+    },
+    {
+      "case_id": "42_tampered_manifest_bad_latitude",
+      "group": "edge_cases",
+      "description": "Manifest edited after signing to an invalid latitude: FAILED dominates REVIEW.",
+      "expected": {
+        "image_id": "scene_042",
+        "format_valid": true,
+        "signature_valid": false,
+        "metadata_valid": false,
+        "replay_detected": false,
+        "security_status": "FAILED",
+        "reason_codes": [
+          "SIG_INVALID",
+          "META_LATITUDE"
+        ]
+      },
+      "spec_reference": "guide 5 decision order",
+      "policy_override": null,
+      "actual": {
+        "image_id": "scene_042",
+        "format_valid": true,
+        "signature_valid": false,
+        "metadata_valid": false,
+        "replay_detected": false,
+        "security_status": "FAILED",
+        "reason_codes": [
+          "SIG_INVALID",
+          "META_LATITUDE"
+        ]
+      },
+      "reasons": [
+        "SIG_INVALID: Ed25519 signature does not verify against the manifest",
+        "META_LATITUDE: latitude 95.0 is not a number in [-90, 90]"
+      ],
+      "mismatches": [],
+      "passed": true
+    },
+    {
+      "case_id": "43_replay_id_and_content",
+      "group": "edge_cases",
+      "description": "Exact resend of the accepted scene_099 (same ID and same bytes).",
+      "expected": {
+        "image_id": "scene_099",
+        "format_valid": true,
+        "signature_valid": true,
+        "metadata_valid": true,
+        "replay_detected": true,
+        "security_status": "FAILED",
+        "reason_codes": [
+          "REPLAY_ID",
+          "REPLAY_CONTENT"
+        ]
+      },
+      "spec_reference": "guide 4.4",
+      "policy_override": null,
+      "actual": {
+        "image_id": "scene_099",
+        "format_valid": true,
+        "signature_valid": true,
+        "metadata_valid": true,
+        "replay_detected": true,
+        "security_status": "FAILED",
+        "reason_codes": [
+          "REPLAY_ID",
+          "REPLAY_CONTENT"
+        ]
+      },
+      "reasons": [
+        "REPLAY_ID: image_id 'scene_099' was already accepted",
+        "REPLAY_CONTENT: identical image bytes were already accepted"
+      ],
+      "mismatches": [],
+      "passed": true
+    },
+    {
+      "case_id": "44_metadata_policy_failed",
+      "group": "edge_cases",
+      "description": "Stale observation under a policy whose metadata_failure_action is FAILED.",
+      "expected": {
+        "image_id": "scene_044",
+        "format_valid": true,
+        "signature_valid": true,
+        "metadata_valid": false,
+        "replay_detected": false,
+        "security_status": "FAILED",
+        "reason_codes": [
+          "META_TIME_STALE"
+        ]
+      },
+      "spec_reference": "guide 3.3 metadata_failure_action",
+      "policy_override": {
+        "metadata_failure_action": "FAILED"
+      },
+      "actual": {
+        "image_id": "scene_044",
+        "format_valid": true,
+        "signature_valid": true,
+        "metadata_valid": false,
+        "replay_detected": false,
+        "security_status": "FAILED",
+        "reason_codes": [
+          "META_TIME_STALE"
+        ]
+      },
+      "reasons": [
+        "META_TIME_STALE: observation is 100.0 h old, limit 72 h"
+      ],
+      "mismatches": [],
+      "passed": true
+    },
+    {
+      "case_id": "45_clean_jpeg_pass",
+      "group": "edge_cases",
+      "description": "Clean JPEG with the .jpeg spelling (treated as jpg).",
+      "expected": {
+        "image_id": "scene_045",
+        "format_valid": true,
+        "signature_valid": true,
+        "metadata_valid": true,
+        "replay_detected": false,
+        "security_status": "PASSED",
+        "reason_codes": []
+      },
+      "spec_reference": "guide 4.1 'treat jpeg as jpg'",
+      "policy_override": null,
+      "actual": {
+        "image_id": "scene_045",
+        "format_valid": true,
+        "signature_valid": true,
+        "metadata_valid": true,
+        "replay_detected": false,
+        "security_status": "PASSED",
+        "reason_codes": []
+      },
+      "reasons": [],
+      "mismatches": [],
+      "passed": true
+    },
+    {
+      "case_id": "46_missing_image_file",
+      "group": "edge_cases",
+      "description": "Manifest and signature present, image file absent.",
+      "expected": {
+        "image_id": "scene_046",
+        "format_valid": false,
+        "signature_valid": null,
+        "metadata_valid": null,
+        "replay_detected": null,
+        "security_status": "FAILED",
+        "reason_codes": [
+          "FORMAT_MISSING"
+        ]
+      },
+      "spec_reference": "not covered by the guide: extension code FORMAT_MISSING (documented)",
+      "policy_override": null,
+      "actual": {
+        "image_id": "scene_046",
+        "format_valid": false,
+        "signature_valid": null,
+        "metadata_valid": null,
+        "replay_detected": null,
+        "security_status": "FAILED",
+        "reason_codes": [
+          "FORMAT_MISSING"
+        ]
+      },
+      "reasons": [
+        "FORMAT_MISSING: image file not found: Le fichier spécifié est introuvable"
+      ],
+      "mismatches": [],
+      "passed": true
+    },
+    {
+      "case_id": "47_non_ascii_manifest_utf8",
+      "group": "edge_cases",
+      "description": "Signed manifest with non-ASCII text in an extra metadata field, stored on disk as raw UTF-8. Verification must re-canonicalise with ensure_ascii=False.",
+      "expected": {
+        "image_id": "scene_047",
+        "format_valid": true,
+        "signature_valid": true,
+        "metadata_valid": true,
+        "replay_detected": false,
+        "security_status": "PASSED",
+        "reason_codes": []
+      },
+      "spec_reference": "guide 4.2 signing input (ensure_ascii=False, UTF-8)",
+      "policy_override": null,
+      "actual": {
+        "image_id": "scene_047",
+        "format_valid": true,
+        "signature_valid": true,
+        "metadata_valid": true,
+        "replay_detected": false,
+        "security_status": "PASSED",
+        "reason_codes": []
+      },
+      "reasons": [],
+      "mismatches": [],
+      "passed": true
+    },
+    {
+      "case_id": "48_non_ascii_manifest_escaped",
+      "group": "edge_cases",
+      "description": "Signed manifest with non-ASCII text in an extra metadata field, stored on disk as \\u escapes. Verification must re-canonicalise with ensure_ascii=False.",
+      "expected": {
+        "image_id": "scene_048",
+        "format_valid": true,
+        "signature_valid": true,
+        "metadata_valid": true,
+        "replay_detected": false,
+        "security_status": "PASSED",
+        "reason_codes": []
+      },
+      "spec_reference": "guide 4.2 signing input (ensure_ascii=False, UTF-8)",
+      "policy_override": null,
+      "actual": {
+        "image_id": "scene_048",
+        "format_valid": true,
+        "signature_valid": true,
+        "metadata_valid": true,
+        "replay_detected": false,
+        "security_status": "PASSED",
+        "reason_codes": []
+      },
+      "reasons": [],
+      "mismatches": [],
+      "passed": true
+    },
+    {
+      "case_id": "INV_never_reads_expected",
+      "group": "invariants",
+      "description": "assess() never opens expected.json",
+      "expected": null,
+      "actual": null,
+      "reasons": [],
+      "mismatches": [],
+      "passed": true
+    },
+    {
+      "case_id": "INV_ledger_untouched",
+      "group": "invariants",
+      "description": "assess() never modifies the ledger (file or dict)",
+      "expected": null,
+      "actual": null,
+      "reasons": [],
+      "mismatches": [],
+      "passed": true
+    },
+    {
+      "case_id": "INV_record_only_after_pass",
+      "group": "invariants",
+      "description": "ledger update only after PASSED; recorded image then replays",
+      "expected": null,
+      "actual": null,
+      "reasons": [],
+      "mismatches": [],
+      "passed": true
+    },
+    {
+      "case_id": "INV_deterministic",
+      "group": "invariants",
+      "description": "identical inputs give identical results",
+      "expected": null,
+      "actual": null,
+      "reasons": [],
+      "mismatches": [],
+      "passed": true
+    },
+    {
+      "case_id": "INV_no_private_keys",
+      "group": "invariants",
+      "description": "trust store with private key material is refused",
+      "expected": null,
+      "actual": null,
+      "reasons": [],
+      "mismatches": [],
+      "passed": true
+    }
+  ]
+}

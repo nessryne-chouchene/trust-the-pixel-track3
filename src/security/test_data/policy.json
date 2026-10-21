@@ -1,0 +1,14 @@
+{
+  "version": "2026.10-demo",
+  "allowed_formats": [
+    "tif",
+    "png",
+    "jpg"
+  ],
+  "max_file_size_mb": 100,
+  "max_pixels": 40000000,
+  "max_age_hours": 72,
+  "clock_skew_seconds": 300,
+  "metadata_failure_action": "REVIEW",
+  "min_file_size_bytes": 1
+}

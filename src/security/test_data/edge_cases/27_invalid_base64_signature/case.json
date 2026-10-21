@@ -1,0 +1,9 @@
+{
+  "case_id": "27_invalid_base64_signature",
+  "group": "edge_cases",
+  "description": ".sig file exists but is not valid base64.",
+  "spec_reference": "guide 10 stretch goal; decoded in the verify step -> SIG_INVALID (documented choice)",
+  "image": "scene_027.png",
+  "manifest": "scene_027.manifest.json",
+  "signature": "scene_027.manifest.sig"
+}

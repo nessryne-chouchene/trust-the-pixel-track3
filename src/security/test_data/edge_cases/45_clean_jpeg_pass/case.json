@@ -1,0 +1,9 @@
+{
+  "case_id": "45_clean_jpeg_pass",
+  "group": "edge_cases",
+  "description": "Clean JPEG with the .jpeg spelling (treated as jpg).",
+  "spec_reference": "guide 4.1 'treat jpeg as jpg'",
+  "image": "scene_045.jpeg",
+  "manifest": "scene_045.manifest.json",
+  "signature": "scene_045.manifest.sig"
+}

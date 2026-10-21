@@ -1,0 +1,9 @@
+{
+  "case_id": "48_non_ascii_manifest_escaped",
+  "group": "edge_cases",
+  "description": "Signed manifest with non-ASCII text in an extra metadata field, stored on disk as \\u escapes. Verification must re-canonicalise with ensure_ascii=False.",
+  "spec_reference": "guide 4.2 signing input (ensure_ascii=False, UTF-8)",
+  "image": "scene_048.png",
+  "manifest": "scene_048.manifest.json",
+  "signature": "scene_048.manifest.sig"
+}

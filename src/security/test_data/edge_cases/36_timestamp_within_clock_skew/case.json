@@ -1,0 +1,9 @@
+{
+  "case_id": "36_timestamp_within_clock_skew",
+  "group": "edge_cases",
+  "description": "Observation 4 min after the reference time; inside the 300 s skew, so accepted.",
+  "spec_reference": "guide 3.3 clock_skew_seconds",
+  "image": "scene_036.png",
+  "manifest": "scene_036.manifest.json",
+  "signature": "scene_036.manifest.sig"
+}

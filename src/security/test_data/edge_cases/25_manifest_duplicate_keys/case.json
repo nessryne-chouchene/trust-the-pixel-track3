@@ -1,0 +1,9 @@
+{
+  "case_id": "25_manifest_duplicate_keys",
+  "group": "edge_cases",
+  "description": "Manifest text repeats the image_id key with two values; ambiguous, so rejected.",
+  "spec_reference": "implementation hardening (documented): duplicate JSON keys -> MANIFEST_INVALID",
+  "image": "scene_025.png",
+  "manifest": "scene_025.manifest.json",
+  "signature": "scene_025.manifest.sig"
+}

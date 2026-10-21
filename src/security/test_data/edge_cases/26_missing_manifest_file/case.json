@@ -1,0 +1,9 @@
+{
+  "case_id": "26_missing_manifest_file",
+  "group": "edge_cases",
+  "description": "No manifest file at all.",
+  "spec_reference": "guide 4.2 'manifest unreadable' -> MANIFEST_INVALID",
+  "image": "scene_026.png",
+  "manifest": "scene_026.manifest.json",
+  "signature": "scene_026.manifest.sig"
+}

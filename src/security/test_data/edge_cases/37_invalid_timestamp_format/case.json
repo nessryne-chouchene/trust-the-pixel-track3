@@ -1,0 +1,9 @@
+{
+  "case_id": "37_invalid_timestamp_format",
+  "group": "edge_cases",
+  "description": "Timestamp uses a space and no 'Z'.",
+  "spec_reference": "guide 4.3 META_TIME_INVALID",
+  "image": "scene_037.png",
+  "manifest": "scene_037.manifest.json",
+  "signature": "scene_037.manifest.sig"
+}

@@ -1,0 +1,9 @@
+{
+  "case_id": "20_decompression_bomb_header",
+  "group": "edge_cases",
+  "description": "Tiny PNG whose IHDR claims 100000x100000 px; must be rejected from the header.",
+  "spec_reference": "guide 4.1 FORMAT_DIMENSIONS (decompression bomb guard)",
+  "image": "scene_020.png",
+  "manifest": "scene_020.manifest.json",
+  "signature": "scene_020.manifest.sig"
+}

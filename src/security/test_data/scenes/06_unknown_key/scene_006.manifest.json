@@ -1,0 +1,16 @@
+{
+  "manifest_version": 1,
+  "image_id": "scene_006",
+  "file_name": "scene_006.png",
+  "sha256": "d66b9184eac1c337c3dd88a30aa3962f4e9efdd6fc59942628afcb8d4710b255",
+  "size_bytes": 10039,
+  "metadata": {
+    "timestamp": "2026-10-13T03:00:00Z",
+    "sensor_id": "SAT-ALPHA-01",
+    "latitude": 36.1,
+    "longitude": 10.1
+  },
+  "key_id": "sat-rogue-99",
+  "nonce": "056ca09160f733a1a9e8bac778b13961",
+  "signed_at": "2026-10-13T03:05:00Z"
+}

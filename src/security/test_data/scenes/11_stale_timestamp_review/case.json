@@ -1,0 +1,9 @@
+{
+  "case_id": "11_stale_timestamp_review",
+  "group": "scenes",
+  "description": "Observation 100 h old (limit 72 h).",
+  "spec_reference": "guide 7.3 scene 11",
+  "image": "scene_011.png",
+  "manifest": "scene_011.manifest.json",
+  "signature": "scene_011.manifest.sig"
+}

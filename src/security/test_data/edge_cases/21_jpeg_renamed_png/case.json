@@ -1,0 +1,9 @@
+{
+  "case_id": "21_jpeg_renamed_png",
+  "group": "edge_cases",
+  "description": "Real JPEG saved with a .png extension.",
+  "spec_reference": "guide 4.1 FORMAT_MAGIC",
+  "image": "scene_021.png",
+  "manifest": "scene_021.manifest.json",
+  "signature": "scene_021.manifest.sig"
+}

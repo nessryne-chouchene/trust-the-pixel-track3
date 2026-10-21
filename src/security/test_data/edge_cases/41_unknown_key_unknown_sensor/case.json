@@ -1,0 +1,9 @@
+{
+  "case_id": "41_unknown_key_unknown_sensor",
+  "group": "edge_cases",
+  "description": "Unknown key and a sensor that exists nowhere in the trust store.",
+  "spec_reference": "guide 7.3 scene 06 rule + 4.3 META_SENSOR",
+  "image": "scene_041.png",
+  "manifest": "scene_041.manifest.json",
+  "signature": "scene_041.manifest.sig"
+}

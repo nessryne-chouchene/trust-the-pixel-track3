@@ -1,0 +1,9 @@
+{
+  "case_id": "19_excessive_dimensions",
+  "group": "edge_cases",
+  "description": "Decodable 7000x6000 (42 Mpx) 1-bit PNG, a few KB on disk; limit is 40 Mpx.",
+  "spec_reference": "guide 4.1 FORMAT_DIMENSIONS",
+  "image": "scene_019.png",
+  "manifest": "scene_019.manifest.json",
+  "signature": "scene_019.manifest.sig"
+}

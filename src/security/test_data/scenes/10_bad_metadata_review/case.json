@@ -1,0 +1,9 @@
+{
+  "case_id": "10_bad_metadata_review",
+  "group": "scenes",
+  "description": "Valid signature; latitude out of range and sensor not allowed for the key.",
+  "spec_reference": "guide 7.3 scene 10",
+  "image": "scene_010.png",
+  "manifest": "scene_010.manifest.json",
+  "signature": "scene_010.manifest.sig"
+}

@@ -1,0 +1,9 @@
+{
+  "case_id": "24_manifest_bad_version",
+  "group": "edge_cases",
+  "description": "Validly signed manifest with manifest_version 2.",
+  "spec_reference": "guide 3.6 'Must be 1' -> MANIFEST_INVALID",
+  "image": "scene_024.png",
+  "manifest": "scene_024.manifest.json",
+  "signature": "scene_024.manifest.sig"
+}

@@ -1,0 +1,54 @@
+case_id,group,result,expected_status,actual_status,expected_flags,actual_flags,expected_reason_codes,actual_reason_codes,mismatches,description
+01_clean_pass,scenes,PASS,PASSED,PASSED,true/true/true/false,true/true/true/false,,,,Clean PNG signed by sat-alpha-2026a.
+02_clean_pass_bravo_tif,scenes,PASS,PASSED,PASSED,true/true/true/false,true/true/true/false,,,,Clean uncompressed TIFF signed by a second key for its own sensor.
+03_image_tampered,scenes,PASS,FAILED,FAILED,true/false/true/false,true/false/true/false,HASH_MISMATCH,HASH_MISMATCH,,Image pixels changed after signing; manifest and signature intact.
+04_manifest_tampered,scenes,PASS,FAILED,FAILED,true/false/true/false,true/false/true/false,SIG_INVALID,SIG_INVALID,,Manifest latitude edited after signing.
+05_forged_signature,scenes,PASS,FAILED,FAILED,true/false/true/false,true/false/true/false,SIG_INVALID,SIG_INVALID,,Claims sat-alpha-2026a but signed with the attacker's key.
+06_unknown_key,scenes,PASS,FAILED,FAILED,true/false/true/false,true/false/true/false,KEY_UNKNOWN,KEY_UNKNOWN,,"Correctly signed by sat-rogue-99, which is not in the trust store. Sensor exists elsewhere in the store, so metadata is valid."
+07_revoked_key,scenes,PASS,FAILED,FAILED,true/false/true/false,true/false/true/false,KEY_REVOKED,KEY_REVOKED,,Mathematically valid signature from the revoked key sat-alpha-2025x.
+08_replay_same_id,scenes,PASS,FAILED,FAILED,true/true/true/true,true/true/true/true,REPLAY_ID,REPLAY_ID,,New picture reusing the already-accepted image_id scene_099.
+09_replay_same_content,scenes,PASS,FAILED,FAILED,true/true/true/true,true/true/true/true,REPLAY_CONTENT,REPLAY_CONTENT,,"Fresh image_id, but the bytes of the picture accepted as scene_099."
+10_bad_metadata_review,scenes,PASS,REVIEW,REVIEW,true/true/false/false,true/true/false/false,META_LATITUDE META_SENSOR,META_LATITUDE META_SENSOR,,Valid signature; latitude out of range and sensor not allowed for the key.
+11_stale_timestamp_review,scenes,PASS,REVIEW,REVIEW,true/true/false/false,true/true/false/false,META_TIME_STALE,META_TIME_STALE,,Observation 100 h old (limit 72 h).
+12_fake_format,scenes,PASS,FAILED,FAILED,false/null/null/null,false/null/null/null,FORMAT_MAGIC,FORMAT_MAGIC,,60-byte text file renamed to .png; manifest and signature consistent with it.
+13_missing_signature,scenes,PASS,FAILED,FAILED,true/false/true/false,true/false/true/false,SIG_MISSING,SIG_MISSING,,"Image and manifest present, no .manifest.sig file."
+14_empty_file,edge_cases,PASS,FAILED,FAILED,false/null/null/null,false/null/null/null,FORMAT_SIZE,FORMAT_SIZE,,Zero-byte .png (below policy.min_file_size_bytes).
+15_truncated_png,edge_cases,PASS,FAILED,FAILED,false/null/null/null,false/null/null/null,FORMAT_DECODE,FORMAT_DECODE,,"PNG cut to 60 % of its length; header parses, full decode fails."
+16_disallowed_extension,edge_cases,PASS,FAILED,FAILED,false/null/null/null,false/null/null/null,FORMAT_EXTENSION,FORMAT_EXTENSION,,Valid BMP image; bmp is not in allowed_formats.
+17_png_magic_garbage,edge_cases,PASS,FAILED,FAILED,false/null/null/null,false/null/null/null,FORMAT_DECODE,FORMAT_DECODE,,Correct PNG magic followed by random bytes; the image library cannot open it.
+18_oversized_file,edge_cases,PASS,FAILED,FAILED,false/null/null/null,false/null/null/null,FORMAT_SIZE,FORMAT_SIZE,,Normal PNG (several KB) assessed with max_file_size_mb = 0.001 (~1 KB) to avoid a 100 MB fixture.
+19_excessive_dimensions,edge_cases,PASS,FAILED,FAILED,false/null/null/null,false/null/null/null,FORMAT_DIMENSIONS,FORMAT_DIMENSIONS,,"Decodable 7000x6000 (42 Mpx) 1-bit PNG, a few KB on disk; limit is 40 Mpx."
+20_decompression_bomb_header,edge_cases,PASS,FAILED,FAILED,false/null/null/null,false/null/null/null,FORMAT_DIMENSIONS,FORMAT_DIMENSIONS,,Tiny PNG whose IHDR claims 100000x100000 px; must be rejected from the header.
+21_jpeg_renamed_png,edge_cases,PASS,FAILED,FAILED,false/null/null/null,false/null/null/null,FORMAT_MAGIC,FORMAT_MAGIC,,Real JPEG saved with a .png extension.
+22_malformed_manifest_json,edge_cases,PASS,FAILED,FAILED,true/false/null/false,true/false/null/false,MANIFEST_INVALID,MANIFEST_INVALID,,"Truncated, unparseable manifest JSON. No manifest object, so metadata cannot run (null)."
+23_manifest_missing_field,edge_cases,PASS,FAILED,FAILED,true/false/true/false,true/false/true/false,MANIFEST_INVALID,MANIFEST_INVALID,,Validly signed manifest without the required 'nonce' field.
+24_manifest_bad_version,edge_cases,PASS,FAILED,FAILED,true/false/true/false,true/false/true/false,MANIFEST_INVALID,MANIFEST_INVALID,,Validly signed manifest with manifest_version 2.
+25_manifest_duplicate_keys,edge_cases,PASS,FAILED,FAILED,true/false/null/false,true/false/null/false,MANIFEST_INVALID,MANIFEST_INVALID,,"Manifest text repeats the image_id key with two values; ambiguous, so rejected."
+26_missing_manifest_file,edge_cases,PASS,FAILED,FAILED,true/false/null/false,true/false/null/false,MANIFEST_INVALID,MANIFEST_INVALID,,No manifest file at all.
+27_invalid_base64_signature,edge_cases,PASS,FAILED,FAILED,true/false/true/false,true/false/true/false,SIG_INVALID,SIG_INVALID,,.sig file exists but is not valid base64.
+28_signature_wrong_length,edge_cases,PASS,FAILED,FAILED,true/false/true/false,true/false/true/false,SIG_INVALID,SIG_INVALID,,Valid base64 but only 32 bytes (an Ed25519 signature is 64).
+29_key_expired,edge_cases,PASS,FAILED,FAILED,true/false/true/false,true/false/true/false,KEY_NOT_VALID,KEY_NOT_VALID,,Active key valid 2024-01-01..2025-01-01 used to sign on 2026-10-13.
+30_key_not_yet_valid,edge_cases,PASS,FAILED,FAILED,true/false/true/false,true/false/true/false,KEY_NOT_VALID,KEY_NOT_VALID,,Active key valid from 2027-01-01 used to sign on 2026-10-13.
+31_signed_at_unparseable,edge_cases,PASS,FAILED,FAILED,true/false/true/false,true/false/true/false,KEY_NOT_VALID,KEY_NOT_VALID,,"signed_at is not ISO-8601, so it cannot be shown to lie in the key's validity period."
+32_metadata_missing_timestamp,edge_cases,PASS,REVIEW,REVIEW,true/true/false/false,true/true/false/false,META_MISSING_FIELD,META_MISSING_FIELD,,Validly signed manifest whose metadata lacks 'timestamp'.
+33_invalid_longitude,edge_cases,PASS,REVIEW,REVIEW,true/true/false/false,true/true/false/false,META_LONGITUDE,META_LONGITUDE,,Longitude 200.5 (range is +-180).
+34_non_numeric_latitude,edge_cases,PASS,REVIEW,REVIEW,true/true/false/false,true/true/false/false,META_LATITUDE,META_LATITUDE,,"Latitude given as the string ""36.8"" instead of a number."
+35_future_timestamp,edge_cases,PASS,REVIEW,REVIEW,true/true/false/false,true/true/false/false,META_TIME_FUTURE,META_TIME_FUTURE,,Observation 1 h after the reference time (skew tolerance 300 s).
+36_timestamp_within_clock_skew,edge_cases,PASS,PASSED,PASSED,true/true/true/false,true/true/true/false,,,,"Observation 4 min after the reference time; inside the 300 s skew, so accepted."
+37_invalid_timestamp_format,edge_cases,PASS,REVIEW,REVIEW,true/true/false/false,true/true/false/false,META_TIME_INVALID,META_TIME_INVALID,,Timestamp uses a space and no 'Z'.
+38_filename_mismatch,edge_cases,PASS,REVIEW,REVIEW,true/true/false/false,true/true/false/false,META_FILENAME,META_FILENAME,,Manifest names scene_038_original.png; the received file is scene_038.png.
+39_sensor_of_other_key,edge_cases,PASS,REVIEW,REVIEW,true/true/false/false,true/true/false/false,META_SENSOR,META_SENSOR,,"sat-alpha-2026a signs for SAT-BRAVO-01, which only the bravo key may speak for."
+40_all_metadata_checks_fail,edge_cases,PASS,REVIEW,REVIEW,true/true/false/false,true/true/false/false,META_LATITUDE META_LONGITUDE META_SENSOR META_TIME_STALE,META_LATITUDE META_LONGITUDE META_SENSOR META_TIME_STALE,,Several metadata failures at once; codes must follow guide 4.3 order.
+41_unknown_key_unknown_sensor,edge_cases,PASS,FAILED,FAILED,true/false/false/false,true/false/false/false,KEY_UNKNOWN META_SENSOR,KEY_UNKNOWN META_SENSOR,,Unknown key and a sensor that exists nowhere in the trust store.
+42_tampered_manifest_bad_latitude,edge_cases,PASS,FAILED,FAILED,true/false/false/false,true/false/false/false,SIG_INVALID META_LATITUDE,SIG_INVALID META_LATITUDE,,Manifest edited after signing to an invalid latitude: FAILED dominates REVIEW.
+43_replay_id_and_content,edge_cases,PASS,FAILED,FAILED,true/true/true/true,true/true/true/true,REPLAY_ID REPLAY_CONTENT,REPLAY_ID REPLAY_CONTENT,,Exact resend of the accepted scene_099 (same ID and same bytes).
+44_metadata_policy_failed,edge_cases,PASS,FAILED,FAILED,true/true/false/false,true/true/false/false,META_TIME_STALE,META_TIME_STALE,,Stale observation under a policy whose metadata_failure_action is FAILED.
+45_clean_jpeg_pass,edge_cases,PASS,PASSED,PASSED,true/true/true/false,true/true/true/false,,,,Clean JPEG with the .jpeg spelling (treated as jpg).
+46_missing_image_file,edge_cases,PASS,FAILED,FAILED,false/null/null/null,false/null/null/null,FORMAT_MISSING,FORMAT_MISSING,,"Manifest and signature present, image file absent."
+47_non_ascii_manifest_utf8,edge_cases,PASS,PASSED,PASSED,true/true/true/false,true/true/true/false,,,,"Signed manifest with non-ASCII text in an extra metadata field, stored on disk as raw UTF-8. Verification must re-canonicalise with ensure_ascii=False."
+48_non_ascii_manifest_escaped,edge_cases,PASS,PASSED,PASSED,true/true/true/false,true/true/true/false,,,,"Signed manifest with non-ASCII text in an extra metadata field, stored on disk as \u escapes. Verification must re-canonicalise with ensure_ascii=False."
+INV_never_reads_expected,invariants,PASS,,,,,,,,assess() never opens expected.json
+INV_ledger_untouched,invariants,PASS,,,,,,,,assess() never modifies the ledger (file or dict)
+INV_record_only_after_pass,invariants,PASS,,,,,,,,ledger update only after PASSED; recorded image then replays
+INV_deterministic,invariants,PASS,,,,,,,,identical inputs give identical results
+INV_no_private_keys,invariants,PASS,,,,,,,,trust store with private key material is refused

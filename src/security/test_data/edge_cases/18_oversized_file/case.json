@@ -1,0 +1,12 @@
+{
+  "case_id": "18_oversized_file",
+  "group": "edge_cases",
+  "description": "Normal PNG (several KB) assessed with max_file_size_mb = 0.001 (~1 KB) to avoid a 100 MB fixture.",
+  "spec_reference": "guide 4.1 FORMAT_SIZE",
+  "image": "scene_018.png",
+  "manifest": "scene_018.manifest.json",
+  "signature": "scene_018.manifest.sig",
+  "policy_override": {
+    "max_file_size_mb": 0.001
+  }
+}

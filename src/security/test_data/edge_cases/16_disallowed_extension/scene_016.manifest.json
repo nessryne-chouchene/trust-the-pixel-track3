@@ -1,0 +1,16 @@
+{
+  "manifest_version": 1,
+  "image_id": "scene_016",
+  "file_name": "scene_016.bmp",
+  "sha256": "c7b1420d6132fdbdd43b71d4cf6c40fa45ed2f4d606cc977cb73cf0fc4c0b4e3",
+  "size_bytes": 196662,
+  "metadata": {
+    "timestamp": "2026-10-13T03:00:00Z",
+    "sensor_id": "SAT-ALPHA-01",
+    "latitude": 36.8,
+    "longitude": 10.8
+  },
+  "key_id": "sat-alpha-2026a",
+  "nonce": "431d57d4a6355ca4b22e47f5c4834d75",
+  "signed_at": "2026-10-13T03:05:00Z"
+}

@@ -1,0 +1,9 @@
+{
+  "case_id": "38_filename_mismatch",
+  "group": "edge_cases",
+  "description": "Manifest names scene_038_original.png; the received file is scene_038.png.",
+  "spec_reference": "guide 4.3 META_FILENAME",
+  "image": "scene_038.png",
+  "manifest": "scene_038.manifest.json",
+  "signature": "scene_038.manifest.sig"
+}

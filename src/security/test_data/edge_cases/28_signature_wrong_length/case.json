@@ -1,0 +1,9 @@
+{
+  "case_id": "28_signature_wrong_length",
+  "group": "edge_cases",
+  "description": "Valid base64 but only 32 bytes (an Ed25519 signature is 64).",
+  "spec_reference": "guide 3.6 / 4.2 SIG_INVALID",
+  "image": "scene_028.png",
+  "manifest": "scene_028.manifest.json",
+  "signature": "scene_028.manifest.sig"
+}

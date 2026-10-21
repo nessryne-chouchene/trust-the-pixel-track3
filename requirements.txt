@@ -1,8 +1,10 @@
 affine==3.0.1
 attrs==26.1.0
 certifi==2026.7.22
+cffi==2.1.1
 click==8.5.0
 colorama==0.4.6
+cryptography==50.0.2
 filelock==4.2.2
 fsspec==2026.9.0
 iniconfig==2.3.1
@@ -14,6 +16,7 @@ numpy==2.5.4
 packaging==26.3
 pillow==13.0.0
 pluggy==1.7.0
+pycparser==3.11
 Pygments==2.21.0
 pyparsing==3.3.3
 pytest==9.1.1

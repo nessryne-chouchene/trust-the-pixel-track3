@@ -1,0 +1,9 @@
+{
+  "case_id": "23_manifest_missing_field",
+  "group": "edge_cases",
+  "description": "Validly signed manifest without the required 'nonce' field.",
+  "spec_reference": "guide 4.2 MANIFEST_INVALID",
+  "image": "scene_023.png",
+  "manifest": "scene_023.manifest.json",
+  "signature": "scene_023.manifest.sig"
+}

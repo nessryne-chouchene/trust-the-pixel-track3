@@ -1,0 +1,9 @@
+{
+  "case_id": "15_truncated_png",
+  "group": "edge_cases",
+  "description": "PNG cut to 60 % of its length; header parses, full decode fails.",
+  "spec_reference": "guide 4.1 'full decode succeeds' -> FORMAT_DECODE",
+  "image": "scene_015.png",
+  "manifest": "scene_015.manifest.json",
+  "signature": "scene_015.manifest.sig"
+}

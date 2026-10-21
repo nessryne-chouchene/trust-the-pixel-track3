@@ -1,0 +1,9 @@
+{
+  "case_id": "07_revoked_key",
+  "group": "scenes",
+  "description": "Mathematically valid signature from the revoked key sat-alpha-2025x.",
+  "spec_reference": "guide 7.3 scene 07",
+  "image": "scene_007.png",
+  "manifest": "scene_007.manifest.json",
+  "signature": "scene_007.manifest.sig"
+}

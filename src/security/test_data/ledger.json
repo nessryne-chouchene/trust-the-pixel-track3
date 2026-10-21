@@ -1,0 +1,14 @@
+{
+  "entries": [
+    {
+      "image_id": "scene_000",
+      "sha256": "f5e8a10eadc4d988c0cad87e3b2462283813b97288995cb193a3fbfb2846554c",
+      "accepted_at": "2026-10-10T08:00:00Z"
+    },
+    {
+      "image_id": "scene_099",
+      "sha256": "d722f22b8dbb5a8634fd6b2776e20cf5c3f999b09222cc866fa202360fedc3a7",
+      "accepted_at": "2026-10-12T21:00:00Z"
+    }
+  ]
+}

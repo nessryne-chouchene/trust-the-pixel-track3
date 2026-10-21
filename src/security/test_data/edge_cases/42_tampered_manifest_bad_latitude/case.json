@@ -1,0 +1,9 @@
+{
+  "case_id": "42_tampered_manifest_bad_latitude",
+  "group": "edge_cases",
+  "description": "Manifest edited after signing to an invalid latitude: FAILED dominates REVIEW.",
+  "spec_reference": "guide 5 decision order",
+  "image": "scene_042.png",
+  "manifest": "scene_042.manifest.json",
+  "signature": "scene_042.manifest.sig"
+}

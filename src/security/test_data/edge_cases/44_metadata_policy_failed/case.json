@@ -1,0 +1,12 @@
+{
+  "case_id": "44_metadata_policy_failed",
+  "group": "edge_cases",
+  "description": "Stale observation under a policy whose metadata_failure_action is FAILED.",
+  "spec_reference": "guide 3.3 metadata_failure_action",
+  "image": "scene_044.png",
+  "manifest": "scene_044.manifest.json",
+  "signature": "scene_044.manifest.sig",
+  "policy_override": {
+    "metadata_failure_action": "FAILED"
+  }
+}

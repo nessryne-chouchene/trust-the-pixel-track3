@@ -1,0 +1,9 @@
+{
+  "case_id": "22_malformed_manifest_json",
+  "group": "edge_cases",
+  "description": "Truncated, unparseable manifest JSON. No manifest object, so metadata cannot run (null).",
+  "spec_reference": "guide 4.2 MANIFEST_INVALID; null-when-not-run rule (documented choice)",
+  "image": "scene_022.png",
+  "manifest": "scene_022.manifest.json",
+  "signature": "scene_022.manifest.sig"
+}

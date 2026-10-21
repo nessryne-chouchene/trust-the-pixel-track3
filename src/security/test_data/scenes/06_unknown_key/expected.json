@@ -1,0 +1,11 @@
+{
+  "image_id": "scene_006",
+  "format_valid": true,
+  "signature_valid": false,
+  "metadata_valid": true,
+  "replay_detected": false,
+  "security_status": "FAILED",
+  "reason_codes": [
+    "KEY_UNKNOWN"
+  ]
+}

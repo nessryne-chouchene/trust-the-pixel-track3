@@ -1,0 +1,16 @@
+{
+  "manifest_version": 1,
+  "image_id": "scene_029",
+  "file_name": "scene_029.png",
+  "sha256": "13eab29b99d5df81decd654af48f6d080d515e6d31d451a39ecd7f7e44944abb",
+  "size_bytes": 11101,
+  "metadata": {
+    "timestamp": "2026-10-13T03:00:00Z",
+    "sensor_id": "SAT-CHARLIE-01",
+    "latitude": 36.8,
+    "longitude": 10.8
+  },
+  "key_id": "sat-charlie-2024",
+  "nonce": "a81f0e3ef644661b0a6aa55d930f7442",
+  "signed_at": "2026-10-13T03:05:00Z"
+}

@@ -1,0 +1,9 @@
+{
+  "case_id": "16_disallowed_extension",
+  "group": "edge_cases",
+  "description": "Valid BMP image; bmp is not in allowed_formats.",
+  "spec_reference": "guide 4.1 FORMAT_EXTENSION",
+  "image": "scene_016.bmp",
+  "manifest": "scene_016.manifest.json",
+  "signature": "scene_016.manifest.sig"
+}

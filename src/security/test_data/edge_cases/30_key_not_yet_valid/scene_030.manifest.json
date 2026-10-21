@@ -1,0 +1,16 @@
+{
+  "manifest_version": 1,
+  "image_id": "scene_030",
+  "file_name": "scene_030.png",
+  "sha256": "92fee0afe9e7baea7ab2c9ca23d923817ab9c43c69f5005433282996c5b5f832",
+  "size_bytes": 9079,
+  "metadata": {
+    "timestamp": "2026-10-13T03:00:00Z",
+    "sensor_id": "SAT-DELTA-01",
+    "latitude": 36.8,
+    "longitude": 10.8
+  },
+  "key_id": "sat-delta-2027",
+  "nonce": "3b49b0b37a9560e437dfefbed11292f2",
+  "signed_at": "2026-10-13T03:05:00Z"
+}

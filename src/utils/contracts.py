@@ -1,4 +1,8 @@
-﻿"""Contrats d'interface Track 3 (version 0.1, a valider avec l'equipe)."""
+"""Contrats d'interface Track 3 (version 0.2, a valider avec l'equipe).
+
+v0.2 : le contrat A (validation) reprend les statuts et champs du module
+src/security (PASSED / REVIEW / FAILED, codes de motifs, preuves).
+"""
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -10,20 +14,29 @@ import torch
 
 
 class ValidationStatus(str, Enum):
-    ACCEPTED = "accepted"
-    ACCEPTED_WITH_WARNINGS = "accepted_with_warnings"
-    REJECTED = "rejected"
+    PASSED = "PASSED"   # format, signature, integrite, metadonnees et rejeu OK
+    REVIEW = "REVIEW"   # provenance prouvee mais metadonnees douteuses : revue humaine
+    FAILED = "FAILED"   # format, signature/integrite invalide ou rejeu detecte
 
 
 @dataclass
 class ValidationReport:
-    """A. Sortie du module validation/securite."""
+    """A. Sortie du module validation/securite (src/security/adapter.py)."""
     status: ValidationStatus
-    sha256: Optional[str]                      # hash du fichier original
-    metadata: dict = field(default_factory=dict)   # ExifTool, dimensions, format...
-    provenance: dict = field(default_factory=dict)  # C2PA: "verified" | "invalid" | "missing"
-    warnings: list[str] = field(default_factory=list)
-    rejection_reason: Optional[str] = None
+    image_id: Optional[str]
+    sha256: Optional[str]                         # hash du fichier recu (None si format invalide)
+    format_valid: Optional[bool]                  # None = controle non execute
+    signature_valid: Optional[bool]
+    metadata_valid: Optional[bool]
+    replay_detected: Optional[bool]
+    reason_codes: list[str] = field(default_factory=list)   # ex. ["HASH_MISMATCH"]
+    reasons: list[str] = field(default_factory=list)        # messages lisibles
+    evidence: dict = field(default_factory=dict)            # cle, politique, liste des controles
+
+    @property
+    def can_proceed(self) -> bool:
+        """Seule une image PASSED part automatiquement vers les modeles."""
+        return self.status is ValidationStatus.PASSED
 
 
 @dataclass

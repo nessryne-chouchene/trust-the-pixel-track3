@@ -1,0 +1,640 @@
+<!doctype html>
+<html lang="en" class="no-js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Satellite Image Security Assessment · TSYP14 Track 3</title>
+<meta name="description" content="Beginner-friendly guide to the TSYP14 Track 3 security assessment module: what it checks, how to run it and how to read its test reports.">
+<link rel="stylesheet" href="style.css">
+<script>document.documentElement.classList.replace("no-js", "js");</script>
+</head>
+<body>
+<a class="skip-link" href="#overview">Skip to content</a>
+
+<!-- ============================ NAVIGATION ============================ -->
+<nav class="site-nav" aria-label="Main">
+  <div class="container nav-inner">
+    <a class="brand" href="#top">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l7 3v5c0 4.5-3 8.3-7 10-4-1.7-7-5.5-7-10V6l7-3z"/><path d="M9 12l2 2 4-4"/></svg>
+      <span>TSYP14 <small>· Track 3</small></span>
+    </a>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="nav-links">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      Menu
+    </button>
+    <ul class="nav-links" id="nav-links">
+      <li><a href="#overview">Overview</a></li>
+      <li><a href="#checks">Security checks</a></li>
+      <li><a href="#files">Project files</a></li>
+      <li><a href="#run">How to run</a></li>
+      <li><a href="#results">Test results</a></li>
+      <li><a href="#limitations">Limitations</a></li>
+      <li><a href="#glossary">Glossary</a></li>
+    </ul>
+  </div>
+</nav>
+
+<main id="top">
+
+<!-- ============================ HERO ============================ -->
+<header class="hero">
+  <div class="container hero-grid">
+    <div>
+      <p class="eyebrow">TSYP14 Technical Challenge · Track 3 “Trust the Pixel”</p>
+      <h1>TSYP14 — Ground Truth Under Attack</h1>
+      <p class="subtitle">Satellite Image Security Assessment</p>
+      <p class="lead">This project checks whether a satellite image can be <strong>trusted before</strong> any AI model looks at it.
+        It answers three questions: <em>Is this a real, undamaged image file? Did it really come from a trusted satellite operator, unchanged?
+        And have we already seen it?</em></p>
+      <div class="chips">
+        <span class="chip ok">✓ Security assessment implemented and tested</span>
+        <span class="chip muted">AI manipulation detection: not part of this project</span>
+      </div>
+    </div>
+    <aside class="hero-card" aria-label="Recorded test run">
+      <div class="label">Automated tests in the last recorded run</div>
+      <div class="big">53 / 53</div>
+      <div class="label">passed (100%)</div>
+      <div class="mini-stats">
+        <div><b>13/13</b><span>guide scenes</span></div>
+        <div><b>35/35</b><span>edge cases</span></div>
+        <div><b>5/5</b><span>safety checks</span></div>
+      </div>
+      <p class="fine">Snapshot from <code>test_results/results.json</code>, run on 18 Oct 2026 (Windows, Python 3.14.5), synthetic test data only. Re-run the tests to refresh — see <a href="#run">How to run</a>.</p>
+    </aside>
+  </div>
+</header>
+
+<!-- ============================ A. OVERVIEW ============================ -->
+<section class="block" id="overview" aria-labelledby="overview-title">
+  <div class="container">
+    <div class="section-head">
+      <p class="kicker">A · Project overview</p>
+      <h2 id="overview-title">What does this project do?</h2>
+      <p>Earth-observation images are used to make real decisions: crop insurance payouts, water management, disaster response.
+        If an attacker can slip in a fake, edited or recycled image, people may act on something that never happened.</p>
+    </div>
+
+    <div class="grid-2">
+      <div class="prose">
+        <h3>The idea in one paragraph</h3>
+        <p>A satellite operator does not just send a picture. It also sends a short <strong>manifest</strong> (a delivery note describing the
+          picture: when and where it was taken, by which sensor, and the picture's unique digital fingerprint) and a
+          <strong>digital signature</strong> on that manifest. Our program, the receiver, checks the file, the signature, the fingerprint,
+          the description and its own memory of past images, then gives one verdict:
+          <span class="badge passed">PASSED</span>, <span class="badge review">REVIEW</span> or <span class="badge failed">FAILED</span>.</p>
+        <p><strong>Everyday comparison:</strong> think of a registered parcel. The box (the image) comes with a delivery note sealed by the sender (the signed manifest).
+          You check the seal is genuine, that the note really describes what is in the box, that the details make sense, and that you were not already sent this exact parcel.</p>
+      </div>
+      <div class="card">
+        <h3>What arrives with each image</h3>
+        <div class="file-trio" style="grid-template-columns:1fr">
+          <div class="file-chip"><code>scene_001.png</code><p>The image itself (PNG, JPEG or TIFF). Not signed directly.</p></div>
+          <div class="file-chip"><code>scene_001.manifest.json</code><p>The description: fingerprint (SHA-256), time, sensor, latitude/longitude, key name, signing time, file name.</p></div>
+          <div class="file-chip"><code>scene_001.manifest.sig</code><p>The sender's Ed25519 signature on the manifest, as one line of base64 text.</p></div>
+        </div>
+      </div>
+    </div>
+
+    <h3 style="margin-top:36px">Workflow of this project</h3>
+    <ol class="flow" aria-label="Workflow">
+      <li><div class="step"><span class="num">1</span><b>Image input</b><span>image + manifest + signature</span></div><div class="arrow" aria-hidden="true">➜</div></li>
+      <li><div class="step"><span class="num">2</span><b>File validation</b><span>real image? safe to open?</span></div><div class="arrow" aria-hidden="true">➜</div></li>
+      <li><div class="step"><span class="num">3</span><b>Security assessment</b><span>signature, fingerprint, metadata, replay</span></div><div class="arrow" aria-hidden="true">➜</div></li>
+      <li><div class="step"><span class="num">4</span><b>Final decision</b><span>PASSED / REVIEW / FAILED</span></div><div class="arrow" aria-hidden="true">➜</div></li>
+      <li><div class="step"><span class="num">5</span><b>Test report</b><span>results.json + results.csv</span></div><div class="arrow" aria-hidden="true">➜</div></li>
+    </ol>
+
+    <p class="flow-label">Later stages of the full TSYP14 architecture — <strong>not implemented here</strong></p>
+    <ol class="flow flow-future" aria-label="Future stages, not implemented">
+      <li><div class="step"><b>Preprocessing</b><span>bands, resize, normalise</span></div><div class="arrow" aria-hidden="true">➜</div></li>
+      <li><div class="step"><b>EfficientNet forensic features</b><span>AI feature extractor</span></div><div class="arrow" aria-hidden="true">➜</div></li>
+      <li><div class="step"><b>Localization &amp; classification heads</b><span>suspicious-region mask, manipulation probability</span></div><div class="arrow" aria-hidden="true">➜</div></li>
+      <li><div class="step"><b>Final report</b><span>combined security + AI evidence</span></div><div class="arrow" aria-hidden="true">➜</div></li>
+    </ol>
+
+    <div class="callout warn">
+      <span class="title">Important: checking origin is not the same as spotting fake pixels</span>
+      <p>This project proves <em>where a file came from</em> and that it <em>was not changed on the way</em>. It does <strong>not</strong> look at the picture
+        to decide whether it was edited. If a trusted operator signs an image that was already doctored, it will pass. Detecting visual manipulation
+        is the job of the AI stages shown above, which are future work.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ B. SECURITY CHECKS ============================ -->
+<section class="block" id="checks" aria-labelledby="checks-title">
+  <div class="container">
+    <div class="section-head">
+      <p class="kicker">B · How the system works</p>
+      <h2 id="checks-title">The security checks, step by step</h2>
+      <p>The checks always run in the same order. Each problem found is recorded as a short <strong>reason code</strong>
+        (for example <code>HASH_MISMATCH</code>) so a person can see exactly why an image was not accepted.
+        All limits come from the configuration file <code>test_data/policy.json</code>.</p>
+    </div>
+
+    <div class="checks">
+
+      <!-- 1 -->
+      <article class="card check-card" id="check-format">
+        <div class="check-head">
+          <div class="icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M9 14l2 2 4-4"/></svg></div>
+          <div><div class="step-no">Step 1</div><h3>File validation</h3></div>
+        </div>
+        <p>Before trusting anything, the program makes sure the file really is a normal, safe image.</p>
+        <ul class="ticks">
+          <li>The file exists and is not empty.</li>
+          <li>The extension is allowed: <code>.png</code>, <code>.jpg</code>/<code>.jpeg</code>, <code>.tif</code>/<code>.tiff</code>.</li>
+          <li>The size is at most 100 MB.</li>
+          <li>The first bytes of the file (its “magic bytes”, like a label inside the box) match the extension.</li>
+          <li>The image library (Pillow) recognises the same format.</li>
+          <li>Width × height is at most 40 million pixels — read from the header <em>before</em> decoding, so a tiny file that claims to be gigantic (a “decompression bomb”) cannot exhaust memory.</li>
+          <li>The whole image decodes without errors (catches truncated or corrupted files).</li>
+        </ul>
+        <p class="stops-note">⛔ If any of these fail, the program <strong>stops immediately</strong> with <span class="badge failed">FAILED</span>. The later checks are reported as “not evaluated” (<code>null</code>).</p>
+        <div class="example"><span class="tag">Example</span>A text document renamed <code>scene_012.png</code> does not start with the PNG magic bytes → <span class="badge failed">FAILED</span> with <code>FORMAT_MAGIC</code>.</div>
+        <details><summary>Reason codes</summary><div class="details-body">
+          <p><code>FORMAT_MISSING</code> file not found (a code added by this project; not in the guide) · <code>FORMAT_EXTENSION</code> · <code>FORMAT_SIZE</code> (also used for empty files) · <code>FORMAT_MAGIC</code> · <code>FORMAT_DECODE</code> · <code>FORMAT_DIMENSIONS</code>.</p>
+          <p>The file is read into memory once; the very same bytes are decoded and fingerprinted, so the file cannot be swapped between two checks.</p>
+        </div></details>
+      </article>
+
+      <!-- 2 -->
+      <article class="card check-card" id="check-signature">
+        <div class="check-head">
+          <div class="icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="15" r="4"/><path d="M10.8 12.2L20 3"/><path d="M17 6l3 3"/><path d="M15 8l2 2"/></svg></div>
+          <div><div class="step-no">Step 2</div><h3>Digital signature verification</h3></div>
+        </div>
+        <p>Each operator owns a secret <strong>private key</strong> and uses it to sign the manifest. The receiver only stores the matching
+          <strong>public keys</strong> in <code>trusted_keys.json</code>. A public key can check a signature but can never create one —
+          like a wax seal that only the owner's ring can make, but that anyone can compare with a reference print.</p>
+        <ul class="ticks">
+          <li>The manifest is readable and contains every required field.</li>
+          <li>A <code>.sig</code> signature file exists.</li>
+          <li>The key named in the manifest (<code>key_id</code>) is in the trust store.</li>
+          <li>The key is <strong>active</strong>, not revoked — checked <em>before</em> any cryptography.</li>
+          <li>The signing time (<code>signed_at</code>) lies inside the key's validity period.</li>
+          <li>The Ed25519 signature is valid for the exact manifest content.</li>
+        </ul>
+        <p class="stops-note">These run in order and stop at the first problem. The result is <span class="badge failed">FAILED</span> if any fails.</p>
+        <div class="example"><span class="tag">Example</span>Someone edits the latitude in a manifest after it was signed → the signature no longer matches → <code>SIG_INVALID</code>. A signature made with a key the receiver revoked → <code>KEY_REVOKED</code>, even though the maths is correct.</div>
+        <details><summary>Technical detail: what exactly is signed</summary><div class="details-body">
+          <p>The signed bytes are a fixed prefix line followed by the manifest written as compact JSON with sorted keys, in UTF-8:</p>
+          <div class="cmd"><pre><code>b"TSYP14-IMG-MANIFEST-v1\n" + json.dumps(manifest, sort_keys=True,
+    separators=(",", ":"), ensure_ascii=False).encode("utf-8")</code></pre></div>
+          <p>Codes: <code>MANIFEST_INVALID</code> · <code>SIG_MISSING</code> · <code>KEY_UNKNOWN</code> · <code>KEY_REVOKED</code> · <code>KEY_NOT_VALID</code> · <code>SIG_INVALID</code>.
+            The program never needs, stores or reveals a private key.</p>
+        </div></details>
+      </article>
+
+      <!-- 3 -->
+      <article class="card check-card" id="check-integrity">
+        <div class="check-head">
+          <div class="icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 11c0 3-1 6-3 8"/><path d="M8 11a4 4 0 0 1 8 0c0 2-.3 4-1 6"/><path d="M5 9a7 7 0 0 1 14 0c0 1.5 0 3-.3 4.5"/><path d="M5 13c0 1.5-.3 3-1 4"/></svg></div>
+          <div><div class="step-no">Step 3</div><h3>Image integrity (SHA-256)</h3></div>
+        </div>
+        <p>The signature protects the <em>manifest</em>, not the image. The link between them is the image's <strong>fingerprint</strong>:
+          a SHA-256 hash, a 64-character code computed from every byte of the file. Change a single pixel and the fingerprint changes completely.</p>
+        <ul class="ticks">
+          <li>The program computes the fingerprint of the image it actually received.</li>
+          <li>It compares it with the fingerprint written in the manifest — <strong>only after</strong> the signature was verified, so the manifest's value can be trusted.</li>
+        </ul>
+        <div class="example"><span class="tag">Example</span>A red rectangle is drawn on an image after it was signed. The manifest and signature are untouched, so the signature check passes — but the fingerprints differ → <span class="badge failed">FAILED</span> with <code>HASH_MISMATCH</code>.</div>
+        <details><summary>Why is this needed if the signature is valid?</summary><div class="details-body">
+          <p>Because an attacker could keep a genuine manifest and signature and simply replace the picture next to them. Only the fingerprint comparison notices that swap.
+            In the result, the flag <code>signature_valid</code> covers both step 2 and step 3.</p>
+        </div></details>
+      </article>
+
+      <!-- 4 -->
+      <article class="card check-card" id="check-metadata">
+        <div class="check-head">
+          <div class="icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-6-5.3-6-10a6 6 0 0 1 12 0c0 4.7-6 10-6 10z"/><circle cx="12" cy="11" r="2.2"/></svg></div>
+          <div><div class="step-no">Step 4</div><h3>Metadata validation</h3></div>
+        </div>
+        <p>A genuinely signed image can still carry suspicious details. These checks always run (even if the signature failed) and <strong>every</strong> problem found is listed.</p>
+        <ul class="ticks">
+          <li>Time, sensor, latitude and longitude are all present.</li>
+          <li>Latitude is a number between −90 and 90; longitude between −180 and 180.</li>
+          <li>The sensor is one the signing key is allowed to speak for (a key for satellite ALPHA cannot vouch for satellite BRAVO).</li>
+          <li>The time is written as <code>YYYY-MM-DDTHH:MM:SSZ</code>.</li>
+          <li>The time is not more than 300 seconds in the future (small clock drift is tolerated).</li>
+          <li>The observation is at most 72 hours old.</li>
+          <li>The file name in the manifest equals the name of the received file.</li>
+        </ul>
+        <p class="stops-note">Ages are measured against a <strong>fixed reference time</strong> (<code>2026-10-13T12:00:00Z</code> in <code>reference_time.txt</code>), not the computer's clock, so results never change as the files get older.</p>
+        <div class="example"><span class="tag">Example</span>A signed manifest says latitude 123.4 and sensor <code>SAT-UNKNOWN</code> → <span class="badge review">REVIEW</span> with <code>META_LATITUDE</code>, <code>META_SENSOR</code>.</div>
+        <details><summary>Reason codes</summary><div class="details-body">
+          <p><code>META_MISSING_FIELD</code> · <code>META_LATITUDE</code> · <code>META_LONGITUDE</code> · <code>META_SENSOR</code> · <code>META_TIME_INVALID</code> · <code>META_TIME_FUTURE</code> · <code>META_TIME_STALE</code> · <code>META_FILENAME</code> (always in this order).</p>
+          <p>If the signing key is unknown, the sensor is accepted when it belongs to <em>any</em> trusted key.</p>
+        </div></details>
+      </article>
+
+      <!-- 5 -->
+      <article class="card check-card" id="check-replay">
+        <div class="check-head">
+          <div class="icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15.5-6.2L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15.5 6.2L3 16"/><path d="M3 21v-5h5"/></svg></div>
+          <div><div class="step-no">Step 5</div><h3>Replay attack detection</h3></div>
+        </div>
+        <p>A <strong>replay</strong> is re-sending something that was already accepted, for example an old image presented as today's.
+          The receiver keeps a memory of accepted images, the <strong>ledger</strong> (<code>ledger.json</code>), listing each image's ID and fingerprint.</p>
+        <ul class="ticks">
+          <li>The image ID must not already be in the ledger (<code>REPLAY_ID</code>).</li>
+          <li>The image's fingerprint must not already be in the ledger, which catches an attacker who only renames the ID (<code>REPLAY_CONTENT</code>).</li>
+        </ul>
+        <div class="example"><span class="tag">Example</span>An image with a fresh ID but exactly the bytes of an image accepted yesterday → <span class="badge failed">FAILED</span> with <code>REPLAY_CONTENT</code>.</div>
+        <details><summary>When is the ledger updated?</summary><div class="details-body">
+          <p>Assessing an image never changes the ledger. An image is added only when it <span class="badge passed">PASSED</span> <em>and</em> you ask for it
+            (the <code>--record</code> option, or the <code>record_accepted()</code> function). Recording rejected images would let an attacker “burn” legitimate IDs by sending garbage.
+            The file is rewritten safely (temporary file, then replace), so a crash cannot leave it half-written.</p>
+        </div></details>
+      </article>
+
+      <!-- 6 -->
+      <article class="card check-card" id="check-decision">
+        <div class="check-head">
+          <div class="icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><path d="M5 7h14"/><path d="M5 7l-3 7a3 3 0 0 0 6 0z"/><path d="M19 7l-3 7a3 3 0 0 0 6 0z"/><path d="M8 21h8"/></svg></div>
+          <div><div class="step-no">Step 6</div><h3>Final security decision</h3></div>
+        </div>
+        <p>The program combines all results into one verdict using three simple questions:</p>
+        <ol class="decision-flow">
+          <li>Did the file check, signature or fingerprint fail, or was a replay found? → <span class="badge failed">FAILED</span></li>
+          <li>Otherwise, did a metadata check fail? → <span class="badge review">REVIEW</span> <small class="t-muted">(set by <code>metadata_failure_action</code> in the policy; it can also be set to FAILED)</small></li>
+          <li>Otherwise → <span class="badge passed">PASSED</span></li>
+        </ol>
+        <p class="stops-note">The answer also lists all reason codes, in check order, plus human-readable reasons and an evidence trail (fingerprint, key, policy version, every check with pass/fail).</p>
+      </article>
+    </div>
+
+    <h3 style="margin-top:44px">The three possible results</h3>
+    <div class="decision-grid">
+      <div class="decision passed"><h3>PASSED</h3><p>Every required check succeeded.</p><p class="t-muted">The image may continue to the next stage of the pipeline.</p></div>
+      <div class="decision review"><h3>REVIEW</h3><p>The image is authentic and unchanged, but its description looks wrong (e.g. impossible coordinates, too old).</p><p class="t-muted">A trusted sender can make mistakes — a human should take a look.</p></div>
+      <div class="decision failed"><h3>FAILED</h3><p>A mandatory check failed: bad file, bad or missing signature, untrusted or revoked key, changed image, or a replay.</p><p class="t-muted">The image is rejected.</p></div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <caption>Example output for one image (real result of test scene 10, simplified)</caption>
+        <thead><tr><th>Field</th><th>Value</th><th>Meaning</th></tr></thead>
+        <tbody>
+          <tr><td><code>image_id</code></td><td><code>"scene_010"</code></td><td>Which image this is.</td></tr>
+          <tr><td><code>format_valid</code></td><td><code>true</code></td><td>Step 1 passed.</td></tr>
+          <tr><td><code>signature_valid</code></td><td><code>true</code></td><td>Steps 2 and 3 passed.</td></tr>
+          <tr><td><code>metadata_valid</code></td><td><code>false</code></td><td>Step 4 found problems.</td></tr>
+          <tr><td><code>replay_detected</code></td><td><code>false</code></td><td>Step 5: no replay (here <code>true</code> would be the bad outcome).</td></tr>
+          <tr><td><code>security_status</code></td><td><span class="badge review">REVIEW</span></td><td>The final verdict.</td></tr>
+          <tr><td><code>reason_codes</code></td><td class="codes"><code>["META_LATITUDE", "META_SENSOR"]</code></td><td>What went wrong, in check order.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ C. PROJECT FILES ============================ -->
+<section class="block" id="files" aria-labelledby="files-title">
+  <div class="container">
+    <div class="section-head">
+      <p class="kicker">C · Project files</p>
+      <h2 id="files-title">What each file is for</h2>
+      <p>Three Python programs do the work. They are kept separate on purpose: the checker never sees the expected answers, and the test-data generator does not reuse the checker's code, so a mistake in one cannot be silently copied into the other.</p>
+    </div>
+
+    <h3>How the pieces work together</h3>
+    <ol class="flow" aria-label="How the files interact">
+      <li><div class="step"><b>generate_test_dataset.py</b><span>creates the test images and answers</span></div><div class="arrow" aria-hidden="true">➜</div></li>
+      <li><div class="step"><b>test_data/</b><span>images, manifests, signatures, expected.json</span></div><div class="arrow" aria-hidden="true">➜</div></li>
+      <li><div class="step"><b>run_security_cases.py</b><span>runs each case, compares with expected.json</span></div><div class="arrow" aria-hidden="true">➜</div></li>
+      <li><div class="step"><b>security_assessment.py</b><span>called for every case: the actual checker</span></div><div class="arrow" aria-hidden="true">➜</div></li>
+      <li><div class="step"><b>test_results/</b><span>results.json + results.csv</span></div><div class="arrow" aria-hidden="true">➜</div></li>
+    </ol>
+
+    <div class="table-wrap files-table" style="margin-top:28px">
+      <table>
+        <thead><tr><th>File or folder</th><th>Role</th></tr></thead>
+        <tbody>
+          <tr><td><code>security_assessment.py</code></td><td><strong>The checker.</strong> Contains <code>assess()</code>, which runs all the checks on one image and returns the verdict, plus helper functions to load the configuration files and to add a PASSED image to the ledger. It can also be used from the command line on a single image. It only uses public keys and never reads test answers.</td></tr>
+          <tr><td><code>generate_test_dataset.py</code></td><td><strong>The test-data factory.</strong> Draws small synthetic “satellite-like” pictures (fields, a road, a river), writes manifests, signs them with throw-away test keys and records the expected answer for each case. The test keys are derived from public labels, are never saved to disk, and must never be used for anything real. Running it twice gives identical files.</td></tr>
+          <tr><td><code>run_security_cases.py</code></td><td><strong>The examiner.</strong> Runs the checker on every test case, compares its answer field by field with <code>expected.json</code>, runs 5 extra safety checks, prints PASS/FAIL with explanations, and writes the reports.</td></tr>
+          <tr><td><code>tools/mutation_check.py</code></td><td><strong>Optional quality check of the tests themselves.</strong> Makes 17 temporary copies of the checker, each with one deliberate bug (for example ignoring revoked keys), and confirms the tests catch every one. Your real files are never modified.</td></tr>
+          <tr><td><code>requirements.txt</code></td><td>The two Python libraries needed: <code>cryptography</code> (Ed25519 signatures) and <code>Pillow</code> (reading images).</td></tr>
+          <tr><td><code>README.md</code></td><td>The technical reference: exact interface, every check, and the documented design choices where the official guide was not specific.</td></tr>
+          <tr><td><code>test_data/</code></td><td>Generated test inputs. Shared files: <code>trusted_keys.json</code> (public keys), <code>policy.json</code> (limits and rules), <code>ledger.json</code> (already-accepted images), <code>reference_time.txt</code> (the fixed “now”). Sub-folders <code>scenes/</code> (the 13 scenarios of the official guide) and <code>edge_cases/</code> (35 extra cases). Each case folder holds the image, manifest, signature, <code>case.json</code> (which files to use) and <code>expected.json</code> (the answer key). <code>CASES.md</code> lists them all.</td></tr>
+          <tr><td><code>test_results/</code></td><td>The reports written by the test runner: <code>results.json</code> (full detail) and <code>results.csv</code> (opens in Excel or LibreOffice).</td></tr>
+          <tr><td><code>web/</code></td><td>This guide page: <code>index.html</code>, <code>style.css</code> and <code>script.js</code>. Open <code>web/index.html</code> in any browser.</td></tr>
+          <tr><td><code>.venv312/</code> (repository root)</td><td>Your private Python environment, created during installation. Not part of the source code; you can delete and recreate it.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ D. HOW TO RUN ============================ -->
+<section class="block" id="run" aria-labelledby="run-title">
+  <div class="container">
+    <div class="section-head">
+      <p class="kicker">D · Install and run</p>
+      <h2 id="run-title">How to install and run the project</h2>
+      <p>You need <strong>Python 3</strong> (the project uses Python 3.12 and the <code>.venv312</code> environment at the repository root; the commands below run from <code>src/security</code>; this module was first tested with Python 3.14.5). No internet is needed after the two libraries are installed.
+        Type each command in a terminal and press <kbd>Enter</kbd>. Copy buttons are provided.</p>
+    </div>
+
+    <div class="tabs" role="tablist" aria-label="Operating system">
+      <button class="tab" role="tab" id="tab-win" aria-controls="panel-win" aria-selected="true" type="button">Windows (PowerShell)</button>
+      <button class="tab" role="tab" id="tab-nix" aria-controls="panel-nix" aria-selected="false" type="button" tabindex="-1">Linux / macOS</button>
+    </div>
+
+    <!-- Windows -->
+    <div class="tab-panel" id="panel-win" role="tabpanel" aria-labelledby="tab-win">
+      <h3 class="tab-panel-title">Windows (PowerShell)</h3>
+      <ol class="steps">
+        <li>
+          <h3>Open PowerShell in the project folder</h3>
+          <p>Easiest way: open the <code>tsyp14_security_assessment</code> folder in File Explorer, click the address bar, type <code>powershell</code> and press <kbd>Enter</kbd>.
+            Or open PowerShell and move into the folder (replace the path with where you saved it):</p>
+          <div class="cmd"><pre><code>cd "C:\path\to\tsyp14_security_assessment"</code></pre></div>
+        </li>
+        <li>
+          <h3>Check that Python is installed</h3>
+          <div class="cmd"><pre><code>py --version</code></pre></div>
+          <p>If this prints a version such as <code>Python 3.14.5</code>, continue. If <code>py</code> is not found, try <code>python --version</code>, or install Python from python.org and tick “Add python.exe to PATH”.</p>
+        </li>
+        <li>
+          <h3>Create a virtual environment (once)</h3>
+          <p>A virtual environment is a private folder (<code>.venv</code>) holding this project's libraries, so they do not interfere with anything else.</p>
+          <div class="cmd"><pre><code>py -3.12 -m venv .venv312</code></pre></div>
+          <p><strong>Optional — activate it</strong> so you can type <code>python</code> instead of the full path. The commands below use the full path, so they work whether or not you activate.</p>
+          <div class="cmd"><pre><code>.\.venv312\Scripts\Activate.ps1</code></pre></div>
+          <p>If PowerShell says running scripts is disabled, allow it for this window only, then activate again:</p>
+          <div class="cmd"><pre><code>Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass</code></pre></div>
+        </li>
+        <li>
+          <h3>Install the dependencies (once)</h3>
+          <div class="cmd"><pre><code>python -m pip install -r ..\..\requirements.txt</code></pre></div>
+        </li>
+        <li>
+          <h3>Generate the synthetic test dataset</h3>
+          <div class="cmd"><pre><code>python generate_test_dataset.py</code></pre></div>
+          <p>Expected output:</p>
+          <div class="cmd"><pre class="output">Wrote 48 cases (13 guide scenes, 35 edge cases) to test_data/</pre></div>
+          <p>This rebuilds <code>test_data/</code> from scratch (identical every time). It refuses to touch a <code>test_data</code> folder it did not create.</p>
+        </li>
+        <li>
+          <h3>Run the automated tests</h3>
+          <div class="cmd"><pre><code>python run_security_cases.py</code></pre></div>
+          <p>The last lines should look like this (see <a href="#results">Test results</a> to read them):</p>
+          <div class="cmd"><pre class="output">Summary: 53/53 passed, 0 failed (100.0%)
+  scenes      13/13
+  edge_cases  35/35
+  invariants  5/5
+Reports: test_results\results.json, test_results\results.csv</pre></div>
+        </li>
+        <li>
+          <h3>Open the reports</h3>
+          <p>The spreadsheet version opens in Excel or LibreOffice; the JSON version opens in Notepad:</p>
+          <div class="cmd"><pre><code>start test_results\results.csv</code></pre></div>
+          <div class="cmd"><pre><code>notepad test_results\results.json</code></pre></div>
+        </li>
+      </ol>
+
+      <h3 style="margin-top:12px">Optional extras</h3>
+      <details><summary>Check a single image from the command line</summary><div class="details-body">
+        <div class="cmd"><pre><code>python security_assessment.py --image test_data\scenes\03_image_tampered\scene_003.png --manifest test_data\scenes\03_image_tampered\scene_003.manifest.json</code></pre></div>
+        <p>It prints the full result. The signature file defaults to the manifest name ending in <code>.sig</code> (<code>--sig</code> to choose another) and the configuration folder defaults to <code>test_data</code> (<code>--config-dir</code>).
+          The program's exit code is <code>0</code> for PASSED, <code>2</code> for REVIEW, <code>3</code> for FAILED and <code>1</code> for a configuration error.</p>
+        <p class="t-warn">Caution: the <code>--record</code> option adds a PASSED image to <code>ledger.json</code> in the configuration folder. Doing that on <code>test_data</code> changes the expected test outcomes; run <code>generate_test_dataset.py</code> again to restore it.</p>
+      </div></details>
+      <details><summary>Check that the tests really catch bugs (mutation check, about 1–2 minutes)</summary><div class="details-body">
+        <div class="cmd"><pre><code>python tools\mutation_check.py</code></pre></div>
+        <p>It should end with <code>17/17 mutants killed; survivors: none</code>.</p>
+      </div></details>
+      <details><summary>Run the tests against the official organiser data</summary><div class="details-body">
+        <p>If you have the official <code>sample_input</code> folder from the challenge, put it next to the project folder and run:</p>
+        <div class="cmd"><pre><code>python run_security_cases.py --data-dir ..\sample_input --results-dir test_results\official</code></pre></div>
+        <p>This has <strong>not</strong> been done yet: the official folder was not available when this project was built.</p>
+      </div></details>
+      <details><summary>View live results in this page</summary><div class="details-body">
+        <p>Browsers do not let a page opened by double-click read other local files. To let the “Load latest results” button below work, serve the project folder locally (only reachable from your own computer), then open <code>http://localhost:8000/web/</code>:</p>
+        <div class="cmd"><pre><code>python -m http.server 8000 --bind 127.0.0.1</code></pre></div>
+        <p>Press <kbd>Ctrl</kbd>+<kbd>C</kbd> in PowerShell to stop it.</p>
+      </div></details>
+    </div>
+
+    <!-- Linux / macOS -->
+    <div class="tab-panel" id="panel-nix" role="tabpanel" aria-labelledby="tab-nix" hidden>
+      <h3 class="tab-panel-title">Linux / macOS</h3>
+      <div class="callout info"><p>These are the standard equivalents of the Windows commands. They were <strong>not</strong> tested on Linux or macOS for this project.</p></div>
+      <ol class="steps">
+        <li><h3>Open a terminal in the project folder</h3>
+          <div class="cmd"><pre><code>cd /path/to/tsyp14_security_assessment</code></pre></div></li>
+        <li><h3>Create and activate a virtual environment</h3>
+          <div class="cmd"><pre><code>python3 -m venv .venv</code></pre></div>
+          <div class="cmd"><pre><code>source .venv312/bin/activate</code></pre></div></li>
+        <li><h3>Install the dependencies</h3>
+          <div class="cmd"><pre><code>python -m pip install -r ../../requirements.txt</code></pre></div></li>
+        <li><h3>Generate the synthetic test dataset</h3>
+          <div class="cmd"><pre><code>python generate_test_dataset.py</code></pre></div></li>
+        <li><h3>Run the automated tests</h3>
+          <div class="cmd"><pre><code>python run_security_cases.py</code></pre></div></li>
+        <li><h3>Look at the reports</h3>
+          <div class="cmd"><pre><code>less test_results/results.json</code></pre></div>
+          <p>Open <code>test_results/results.csv</code> with any spreadsheet program.</p></li>
+        <li><h3>Optional: serve this page to load live results</h3>
+          <div class="cmd"><pre><code>python -m http.server 8000 --bind 127.0.0.1</code></pre></div>
+          <p>Then open <code>http://localhost:8000/web/</code>.</p></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ E. TEST RESULTS ============================ -->
+<section class="block" id="results" aria-labelledby="results-title">
+  <div class="container">
+    <div class="section-head">
+      <p class="kicker">E · Understanding the results</p>
+      <h2 id="results-title">How to read the test output</h2>
+      <p>Each test case is an image scenario built to provoke one specific behaviour. The test runner checks that the program gives exactly the answer the official guide requires.</p>
+    </div>
+
+    <div class="callout ok">
+      <span class="title">Two different questions — don't mix them up</span>
+      <ul>
+        <li><strong>Security decision</strong> (<span class="badge passed">PASSED</span> <span class="badge review">REVIEW</span> <span class="badge failed">FAILED</span>): the program's verdict <em>about the image</em>.</li>
+        <li><strong>Test outcome</strong> (<span class="t-ok">PASS</span> / <span class="t-bad">FAIL</span>): whether the program <em>gave the right verdict</em>.</li>
+      </ul>
+      <p>A tampered image <em>should</em> be rejected. So when the program answers <span class="badge failed">FAILED</span> for it, the test is a <span class="t-ok"><strong>PASS</strong></span>. The test would FAIL if the tampered image were accepted.</p>
+    </div>
+
+    <h3>Anatomy of one line of output</h3>
+    <div class="anatomy">
+      <div class="line" aria-label="Annotated output line">
+        <span class="part"><span class="t-ok">[PASS]</span><small>test outcome</small></span>
+        <span class="part"><span>03_image_tampered</span><small>test case name</small></span>
+        <span class="part"><span class="t-bad">FAILED</span><small>security decision</small></span>
+        <span class="part"><span class="t-muted">HASH_MISMATCH</span><small>reason codes (“-” = none)</small></span>
+      </div>
+    </div>
+    <p style="margin-top:14px">When a test does not match, the runner prints one explanation per wrong field. This is real output from a deliberately broken copy of the checker that ignores revoked keys:</p>
+    <div class="cmd"><pre class="output"><span class="t-bad">[FAIL]</span> 07_revoked_key                       PASSED  -
+         -&gt; signature_valid: expected false, got true
+         -&gt; security_status: expected "FAILED", got "PASSED"
+         -&gt; reason_codes: expected ["KEY_REVOKED"], got []</pre></div>
+    <p>A test passes only if <strong>all</strong> of these match: the image ID, the four check flags, the final status, and the reason codes <em>in the same order</em>. The runner exits with code <code>0</code> if everything passed, <code>1</code> if anything failed, and <code>2</code> if the test data is missing.</p>
+
+    <h3 style="margin-top:36px">Results of the last recorded run</h3>
+    <p class="t-muted">Recorded on 18 Oct 2026 (Windows, Python 3.14.5, module version 1.0.0). These numbers are copied into this page from <code>test_results/results.json</code>; every new run replaces that file, and the “Load latest results” button below shows its exact contents and time.</p>
+    <div class="stat-row">
+      <div class="stat ok"><b>53 / 53</b><span>tests passed</span></div>
+      <div class="stat ok"><b>13 / 13</b><span>official guide scenes</span></div>
+      <div class="stat ok"><b>35 / 35</b><span>extra edge cases</span></div>
+      <div class="stat ok"><b>5 / 5</b><span>safety checks (invariants)</span></div>
+    </div>
+
+    <div class="table-wrap stack-mobile">
+      <table>
+        <caption>The 13 scenes of the official guide — real results from the recorded run</caption>
+        <thead><tr><th>Test case</th><th>What it simulates</th><th>Expected</th><th>Actual</th><th>Reason codes</th><th>Test outcome</th></tr></thead>
+        <tbody id="scene-rows">
+          <tr><td><code>01_clean_pass</code></td><td>Clean PNG from a trusted operator</td><td><span class="badge passed">PASSED</span></td><td><span class="badge passed">PASSED</span></td><td>–</td><td class="outcome-pass">✓ Pass</td></tr>
+          <tr><td><code>02_clean_pass_bravo_tif</code></td><td>Clean TIFF signed by a second trusted key</td><td><span class="badge passed">PASSED</span></td><td><span class="badge passed">PASSED</span></td><td>–</td><td class="outcome-pass">✓ Pass</td></tr>
+          <tr><td><code>03_image_tampered</code></td><td>Pixels changed after signing</td><td><span class="badge failed">FAILED</span></td><td><span class="badge failed">FAILED</span></td><td class="codes"><code>HASH_MISMATCH</code></td><td class="outcome-pass">✓ Pass</td></tr>
+          <tr><td><code>04_manifest_tampered</code></td><td>Manifest edited after signing</td><td><span class="badge failed">FAILED</span></td><td><span class="badge failed">FAILED</span></td><td class="codes"><code>SIG_INVALID</code></td><td class="outcome-pass">✓ Pass</td></tr>
+          <tr><td><code>05_forged_signature</code></td><td>Signed with an attacker's key</td><td><span class="badge failed">FAILED</span></td><td><span class="badge failed">FAILED</span></td><td class="codes"><code>SIG_INVALID</code></td><td class="outcome-pass">✓ Pass</td></tr>
+          <tr><td><code>06_unknown_key</code></td><td>Key not in the trust store</td><td><span class="badge failed">FAILED</span></td><td><span class="badge failed">FAILED</span></td><td class="codes"><code>KEY_UNKNOWN</code></td><td class="outcome-pass">✓ Pass</td></tr>
+          <tr><td><code>07_revoked_key</code></td><td>Valid signature from a revoked key</td><td><span class="badge failed">FAILED</span></td><td><span class="badge failed">FAILED</span></td><td class="codes"><code>KEY_REVOKED</code></td><td class="outcome-pass">✓ Pass</td></tr>
+          <tr><td><code>08_replay_same_id</code></td><td>New picture reusing an accepted ID</td><td><span class="badge failed">FAILED</span></td><td><span class="badge failed">FAILED</span></td><td class="codes"><code>REPLAY_ID</code></td><td class="outcome-pass">✓ Pass</td></tr>
+          <tr><td><code>09_replay_same_content</code></td><td>Accepted picture re-sent under a new ID</td><td><span class="badge failed">FAILED</span></td><td><span class="badge failed">FAILED</span></td><td class="codes"><code>REPLAY_CONTENT</code></td><td class="outcome-pass">✓ Pass</td></tr>
+          <tr><td><code>10_bad_metadata_review</code></td><td>Impossible latitude and wrong sensor</td><td><span class="badge review">REVIEW</span></td><td><span class="badge review">REVIEW</span></td><td class="codes"><code>META_LATITUDE</code> <code>META_SENSOR</code></td><td class="outcome-pass">✓ Pass</td></tr>
+          <tr><td><code>11_stale_timestamp_review</code></td><td>Observation 100 hours old</td><td><span class="badge review">REVIEW</span></td><td><span class="badge review">REVIEW</span></td><td class="codes"><code>META_TIME_STALE</code></td><td class="outcome-pass">✓ Pass</td></tr>
+          <tr><td><code>12_fake_format</code></td><td>Text file renamed to .png</td><td><span class="badge failed">FAILED</span></td><td><span class="badge failed">FAILED</span></td><td class="codes"><code>FORMAT_MAGIC</code></td><td class="outcome-pass">✓ Pass</td></tr>
+          <tr><td><code>13_missing_signature</code></td><td>No signature file</td><td><span class="badge failed">FAILED</span></td><td><span class="badge failed">FAILED</span></td><td class="codes"><code>SIG_MISSING</code></td><td class="outcome-pass">✓ Pass</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <details>
+      <summary>The 35 extra edge cases and 5 safety checks — what they cover</summary>
+      <div class="details-body">
+        <p>All 35 edge cases and all 5 safety checks passed in the recorded run. They cover:</p>
+        <ul>
+          <li><strong>Broken or dangerous files:</strong> empty file, truncated PNG, <code>.bmp</code> file, PNG label followed by garbage, oversized file, a real 7000×6000 image (42 million pixels), a tiny file claiming 100000×100000 pixels, a JPEG renamed to <code>.png</code>, a missing image.</li>
+          <li><strong>Manifest and signature problems:</strong> broken JSON, missing field, wrong version, duplicated field, missing manifest, signature that is not base64, too-short signature, expired key, not-yet-valid key, unreadable signing time.</li>
+          <li><strong>Metadata problems:</strong> missing timestamp, longitude 200.5, latitude written as text, time 1 hour in the future, time 4 minutes ahead (tolerated → PASSED), badly written time, wrong file name, sensor belonging to another operator, four problems at once (checks the order of codes).</li>
+          <li><strong>Combinations:</strong> unknown key and unknown sensor, tampered manifest with a bad latitude (FAILED wins over REVIEW), replay by both ID and content, a policy that turns metadata problems into FAILED, a clean <code>.jpeg</code>, and two manifests containing accented and Arabic text.</li>
+          <li><strong>Safety checks:</strong> the checker never opens the answer files; it never changes the ledger; the ledger accepts only PASSED images (and a recorded image is then caught as a replay); identical inputs give identical results; a trust store containing a private key is refused.</li>
+        </ul>
+        <p>The full list with expected flags and codes is in <a href="../test_data/CASES.md">test_data/CASES.md</a>.</p>
+      </div>
+    </details>
+
+    <h3 style="margin-top:36px">Open the reports</h3>
+    <p>These links open the files in your browser (the CSV may be downloaded instead, depending on your browser). If they do not open, generate the data and run the tests first.</p>
+    <div class="btn-row">
+      <a class="btn" href="../test_results/results.csv">results.csv</a>
+      <a class="btn" href="../test_results/results.json">results.json</a>
+      <a class="btn" href="../test_data/CASES.md">CASES.md (all test cases)</a>
+    </div>
+    <details open>
+      <summary>Columns of results.csv</summary>
+      <div class="details-body">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Column</th><th>Meaning</th></tr></thead>
+            <tbody>
+              <tr><td><code>case_id</code>, <code>group</code></td><td>Test case name and its group (<code>scenes</code>, <code>edge_cases</code> or <code>invariants</code>).</td></tr>
+              <tr><td><code>result</code></td><td><strong>PASS</strong> if the program's answer matched the expected answer, otherwise <strong>FAIL</strong>.</td></tr>
+              <tr><td><code>expected_status</code>, <code>actual_status</code></td><td>The security decision that should be given, and the one actually given.</td></tr>
+              <tr><td><code>expected_flags</code>, <code>actual_flags</code></td><td>The four check flags, as <code>format/signature/metadata/replay</code>, e.g. <code>true/false/true/false</code>. <code>null</code> means “not evaluated”.</td></tr>
+              <tr><td><code>expected_reason_codes</code>, <code>actual_reason_codes</code></td><td>The reason codes, in order.</td></tr>
+              <tr><td><code>mismatches</code></td><td>Empty when the test passed; otherwise the explanation of each difference.</td></tr>
+              <tr><td><code>description</code></td><td>A short description of the scenario.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </details>
+
+    <h3 style="margin-top:36px">Load the latest results</h3>
+    <p>This button reads <code>test_results/results.json</code> and shows every test from your most recent run. It only works when the page is served locally (see “View live results in this page” in <a href="#run">How to run</a>); when opened by double-click, your browser blocks it and the page will tell you so.</p>
+    <div class="btn-row"><button class="btn primary" type="button" id="load-results">Load latest results</button></div>
+    <p class="live-status" id="live-status" role="status" aria-live="polite"></p>
+    <div id="live-results"></div>
+  </div>
+</section>
+
+<!-- ============================ F. LIMITATIONS ============================ -->
+<section class="block" id="limitations" aria-labelledby="limitations-title">
+  <div class="container">
+    <div class="section-head">
+      <p class="kicker">F · Limitations and future work</p>
+      <h2 id="limitations-title">What this project does not do (yet)</h2>
+    </div>
+    <div class="grid-2">
+      <div>
+        <h3>Current limitations</h3>
+        <ul class="limit-list">
+          <li><strong>No visual manipulation detection.</strong> An image edited <em>before</em> a trusted operator signed it, or signed with a stolen key, will pass. The checks prove origin and integrity, not that the picture shows reality.</li>
+          <li><strong>Synthetic test data only.</strong> The test images are simple generated 256×256 pictures. They prove the checking logic follows the specification; they say nothing about performance on real satellite imagery or sophisticated attacks.</li>
+          <li><strong>Not yet tested on the official organiser data.</strong> The official <code>sample_input</code> folder was not available. The test runner can read it as-is once you have it.</li>
+          <li><strong>Demo keys.</strong> The test keys are derived from public labels so the data is reproducible — anyone can recompute them. Real keys must be random and kept secret (ideally in a hardware security module).</li>
+          <li><strong>No bit-depth or geographic-reference checks.</strong> TIFF files are checked as images, but GeoTIFF georeferencing and the “bit depth = 8” idea from the architecture diagram are not checked (the guide defines no reason code for them).</li>
+          <li><strong>One writer at a time for the ledger.</strong> Ledger updates are crash-safe, but two programs recording images at the same moment are not coordinated.</li>
+          <li><strong>Tested on Windows with Python 3.14.5 only.</strong></li>
+        </ul>
+      </div>
+      <div>
+        <h3>Future improvements</h3>
+        <ul class="limit-list">
+          <li><strong>AI forensics stages</strong> from the architecture: preprocessing, EfficientNet feature extractor, localization head (suspicious-region mask) and classification head (manipulation probability).</li>
+          <li><strong>Combined report</strong> merging the security evidence with the AI results.</li>
+          <li><strong>Run against the official sample data</strong> and real satellite imagery.</li>
+          <li><strong>Optional extra checks</strong> such as bit depth and GeoTIFF coordinates matching the manifest.</li>
+          <li><strong>Production key management:</strong> random keys, secure storage, key rotation.</li>
+          <li><strong>Ledger locking or a small database</strong> if several receivers run in parallel.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ GLOSSARY ============================ -->
+<section class="block" id="glossary" aria-labelledby="glossary-title">
+  <div class="container">
+    <div class="section-head">
+      <p class="kicker">Glossary</p>
+      <h2 id="glossary-title">Technical terms in plain English</h2>
+      <p>Click a term to open its explanation.</p>
+    </div>
+    <div class="glossary">
+      <details><summary>Hash / SHA-256 / fingerprint</summary><div class="details-body"><p>A fixed-length code (64 hexadecimal characters for SHA-256) computed from a file's bytes. Identical files always give the same hash; changing even one byte gives a completely different one. It is practically impossible to make two different files with the same hash.</p></div></details>
+      <details><summary>Digital signature</summary><div class="details-body"><p>A small piece of data made with a secret key that proves who approved a message and that the message has not changed since. Anyone with the matching public key can check it; nobody without the secret key can make it.</p></div></details>
+      <details><summary>Ed25519</summary><div class="details-body"><p>A modern, widely used digital signature method. Its signatures are 64 bytes long and its public keys 32 bytes. Verification answers only “valid” or “invalid”.</p></div></details>
+      <details><summary>Private key / public key</summary><div class="details-body"><p>A matched pair. The private key is kept secret by the sender and used to sign. The public key is shared and used by anyone to verify. This project's checker only ever holds public keys.</p></div></details>
+      <details><summary>Manifest</summary><div class="details-body"><p>The signed “delivery note” sent with each image (<code>.manifest.json</code>): the image's fingerprint, size, file name, time, sensor, position, the name of the signing key, a unique value (nonce) and the signing time.</p></div></details>
+      <details><summary>Base64</summary><div class="details-body"><p>A way to write binary data using only letters, digits, <code>+</code>, <code>/</code> and <code>=</code>, so it can be stored in a text file. The <code>.sig</code> file holds the signature in this form; the checker decodes it before verifying.</p></div></details>
+      <details><summary>Trust store</summary><div class="details-body"><p><code>trusted_keys.json</code>: the list of public keys the receiver trusts, each with its status (active or revoked), the sensors it may speak for, and its validity period.</p></div></details>
+      <details><summary>Revoked key</summary><div class="details-body"><p>A key that was trusted but is no longer (for example because it may have leaked). Signatures made with it are rejected even if they are mathematically correct.</p></div></details>
+      <details><summary>Magic bytes</summary><div class="details-body"><p>The first few bytes of a file that identify its real type. A PNG always starts with <code>89 50 4E 47 0D 0A 1A 0A</code>, a JPEG with <code>FF D8 FF</code>, a TIFF with <code>II*</code> or <code>MM*</code>. Renaming a file does not change them.</p></div></details>
+      <details><summary>Decompression bomb</summary><div class="details-body"><p>A small file that claims to contain an enormous image. Decoding it could fill the computer's memory. The checker reads the claimed size from the header first and refuses images above 40 million pixels.</p></div></details>
+      <details><summary>Replay attack</summary><div class="details-body"><p>Re-sending a message or image that was genuinely accepted before, for example to make old imagery look current. Detected here by remembering accepted IDs and fingerprints.</p></div></details>
+      <details><summary>Ledger</summary><div class="details-body"><p><code>ledger.json</code>: the receiver's memory of accepted images (ID, fingerprint, acceptance time). Only PASSED images may be added.</p></div></details>
+      <details><summary>Policy</summary><div class="details-body"><p><code>policy.json</code>: the configurable rules — allowed formats, maximum file size (100 MB) and pixels (40 million), maximum age (72 h), clock tolerance (300 s), and what to do when only metadata fails (REVIEW).</p></div></details>
+      <details><summary>Reference time</summary><div class="details-body"><p>A fixed “now” (<code>reference_time.txt</code>) used for all time checks, so test results are the same today and next year.</p></div></details>
+      <details><summary>Reason code</summary><div class="details-body"><p>A short label such as <code>HASH_MISMATCH</code> naming one failed check. The list of codes explains a decision; it is empty for PASSED.</p></div></details>
+      <details><summary>Synthetic dataset</summary><div class="details-body"><p>Test data produced by a program rather than collected from the real world. Here: generated pictures plus carefully constructed manifests and signatures, each designed to trigger one behaviour.</p></div></details>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="container">
+    <p>TSYP14 Technical Challenge · Track 3 “Trust the Pixel” — Security Assessment module (version 1.0.0).</p>
+    <p>Based on the TSYP14 Security Assessment teammate guide. Technical details: <a href="../README.md">README.md</a>.</p>
+  </div>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
