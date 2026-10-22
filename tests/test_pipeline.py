@@ -115,10 +115,18 @@ def test_demo_layer_one_scenarios(tiny_npz, model_file, tmp_path):
 def test_benchmark_runs(tiny_npz, model_file, tmp_path):
     from src.pipeline.benchmark import run
     r = run(npz=str(tiny_npz), model_path=str(model_file), n=5, out=str(tmp_path / "b.json"))
-    assert r["n_images"] == 5 and r["total_ms"]["mean"] > 0 and 0 < r["security_overhead_percent"] < 100
+    assert r["n_images"] == 5 and r["warm"]["total_ms"]["mean"] > 0 and 0 < r["warm"]["security_overhead_percent"] < 100
+    assert "cold_first_open" in r
 
 
 def test_mixed_calibration_runs(tiny_npz, model_file, tmp_path):
     from src.models.evaluate_evasion import run
     r = run(npz=str(tiny_npz), model_path=str(model_file), out=str(tmp_path / "e.json"), calibration="mixed")
     assert r["calibration"] == "mixed" and 0 < r["threshold"] < 1
+
+
+def test_far5_calibration_saves_deployable_model(tiny_npz, model_file, tmp_path):
+    from src.models.evaluate_evasion import run
+    r = run(npz=str(tiny_npz), model_path=str(model_file), out=str(tmp_path / "e.json"), calibration="far5")
+    saved = torch.load(model_file.with_name(f"{model_file.stem}_far5.pt"))
+    assert saved["calibration"] == "far5" and saved["threshold"] == pytest.approx(r["threshold"])
