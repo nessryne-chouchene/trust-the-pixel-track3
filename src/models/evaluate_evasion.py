@@ -15,9 +15,10 @@ from pathlib import Path
 import numpy as np
 import torch
 
-from src.forensics.evasion import LAUNDERING, feather, launder
+from src.forensics.evasion import LAUNDERING, feather, launder, random_launder
 from src.forensics.signals import forensic_inputs
 from src.models.forensic_unet import ForensicUNet
+from src.models.evaluation import choose_threshold
 from src.models.train_forensic import predict_all
 from src.utils.metrics import auc_score, classification_metrics, segmentation_metrics
 
@@ -38,11 +39,28 @@ def _metrics(labels, scores, probs, masks, threshold) -> dict:
             "false_alarm_rate": m["false_alarm_rate"], "iou": iou}
 
 
+def mixed_threshold(model, data: dict, seed: int = 0) -> float:
+    """Seuil choisi sur la VALIDATION propre + une copie blanchie au hasard.
+    En exploitation, des images authentiques sont legitimement recompressees ou
+    redimensionnees : calibrer sur ce melange limite les fausses alarmes."""
+    va = np.where(data["split"] == "val")[0]
+    rng = np.random.default_rng(seed)
+    laundered = np.stack([random_launder(img, rng) for img in data["images"][va]])
+    s_clean, _ = predict_all(model, forensic_inputs(data["images"][va]))
+    s_laund, _ = predict_all(model, forensic_inputs(laundered))
+    y = data["labels"][va]
+    return choose_threshold(np.concatenate([y, y]), np.concatenate([s_clean, s_laund]))
+
+
 def run(npz: str = "data/processed/eurosat_tampered.npz", model_path: str = "outputs/forensic_unet.pt",
-        out: str = "outputs/evasion_results.json", seed: int = 0) -> dict:
+        out: str = "outputs/evasion_results.json", seed: int = 0, calibration: str = "clean") -> dict:
     model, threshold = load_model(model_path)
     with np.load(npz) as z:
         data = {k: z[k] for k in z.files}
+    if calibration == "mixed":
+        threshold = mixed_threshold(model, data, seed)
+    elif calibration != "clean":
+        raise ValueError("calibration : 'clean' ou 'mixed'")
     te = np.where(data["split"] == "test")[0]
     images, labels, masks = data["images"][te], data["labels"][te], data["masks"][te]
     attacks, sources = data["attack"][te], data["source"][te]
@@ -63,7 +81,7 @@ def run(npz: str = "data/processed/eurosat_tampered.npz", model_path: str = "out
     s0, p0 = predict_all(model, forensic_inputs(images[sel]))
     rows["splice_only_reference"] = _metrics(labels[sel], s0, p0, masks[sel], threshold)
 
-    res = {"threshold_from_clean_validation": threshold, "n_test": int(len(te)), "results": rows,
+    res = {"threshold": threshold, "calibration": calibration, "n_test": int(len(te)), "results": rows,
            "warning": "Falsifications et blanchiments synthetiques : resultats limites a ce cadre."}
     Path(out).parent.mkdir(parents=True, exist_ok=True)
     Path(out).write_text(json.dumps(res, indent=2), encoding="utf-8")
@@ -71,7 +89,8 @@ def run(npz: str = "data/processed/eurosat_tampered.npz", model_path: str = "out
 
 
 def print_table(res: dict) -> None:
-    print(f"\nRobustesse (seuil fixe, choisi sur validation propre = {res['threshold_from_clean_validation']:.2f})")
+    cal = "validation propre" if res["calibration"] == "clean" else "validation propre + blanchie"
+    print(f"\nRobustesse (seuil fixe = {res['threshold']:.2f}, choisi sur {cal})")
     print(f"{'operation':28s} {'AUC':>6s} {'rappel':>7s} {'fausses al.':>11s} {'IoU':>6s}")
     for name, m in res["results"].items():
         print(f"{name:28s} {m['auc']:6.3f} {m['recall']:7.3f} {m['false_alarm_rate']:11.3f} {m['iou']:6.3f}")
@@ -81,5 +100,7 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--model", default="outputs/forensic_unet.pt")
     ap.add_argument("--out", default="outputs/evasion_results.json")
+    ap.add_argument("--calibration", default="clean", choices=["clean", "mixed"],
+                    help="mixed : seuil choisi sur validation propre + blanchie")
     a = ap.parse_args()
-    print_table(run(model_path=a.model, out=a.out))
+    print_table(run(model_path=a.model, out=a.out, calibration=a.calibration))

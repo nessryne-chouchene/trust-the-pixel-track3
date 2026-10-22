@@ -1,4 +1,6 @@
-"""Contrats d'interface Track 3 (version 0.2, a valider avec l'equipe).
+"""Contrats d'interface Track 3 (version 0.3).
+
+v0.3 : le rapport final porte un verdict, une explication, les temps et les fichiers produits.
 
 v0.2 : le contrat A (validation) reprend les statuts et champs du module
 src/security (PASSED / REVIEW / FAILED, codes de motifs, preuves).
@@ -76,9 +78,13 @@ class LocalizationOutput:
 
 @dataclass
 class ForensicReport:
-    """F. Rapport final."""
+    """F. Rapport final (src/pipeline/analyze.py)."""
     validation: ValidationReport
     classification: Optional[ClassificationOutput] = None
     localization: Optional[LocalizationOutput] = None
+    verdict: str = ""                                     # REJECTED / REVIEW / SUSPECTED / NOT_DETECTED
+    explanation: str = ""                                 # phrase lisible pour l'analyste
     warnings: list[str] = field(default_factory=list)
     limitations: list[str] = field(default_factory=list)
+    timings_ms: dict = field(default_factory=dict)        # securite, traces, modele, total
+    artifacts: dict = field(default_factory=dict)         # chemins des fichiers produits
