@@ -22,9 +22,9 @@
     "failed_cases": [],
     "reference_time": "2026-10-13T12:00:00Z",
     "policy_version": "2026.10-demo",
-    "module_version": "1.0.1",
-    "python": "3.12.10",
-    "run_at_utc": "2026-10-21T16:56:24Z",
+    "module_version": "1.1.0",
+    "python": "3.12.3",
+    "run_at_utc": "2026-10-30T22:17:16Z",
     "note": "Synthetic provenance/integrity tests only; they say nothing about detecting visual manipulation in real satellite imagery."
   },
   "results": [
@@ -1588,7 +1588,7 @@
         ]
       },
       "reasons": [
-        "FORMAT_MISSING: image file not found: Le fichier spécifié est introuvable"
+        "FORMAT_MISSING: image file not found: No such file or directory"
       ],
       "mismatches": [],
       "passed": true

@@ -130,3 +130,15 @@ def test_far5_calibration_saves_deployable_model(tiny_npz, model_file, tmp_path)
     r = run(npz=str(tiny_npz), model_path=str(model_file), out=str(tmp_path / "e.json"), calibration="far5")
     saved = torch.load(model_file.with_name(f"{model_file.stem}_far5.pt"))
     assert saved["calibration"] == "far5" and saved["threshold"] == pytest.approx(r["threshold"])
+
+
+def test_analyze_multiband_geotiff_end_to_end(model_file, tmp_path):
+    import rasterio
+    p = tmp_path / "s2.tif"
+    arr = np.random.default_rng(0).integers(0, 10000, (13, 64, 64)).astype("uint16")
+    with rasterio.open(p, "w", driver="GTiff", height=64, width=64, count=13, dtype="uint16") as dst:
+        dst.write(arr)
+    m, _ = sign_image(p, "s2", observed=OBS, signed_at=OBS)
+    rep = analyze(p, m, now=NOW, model_path=model_file)
+    assert rep.validation.status is ValidationStatus.PASSED, rep.validation.reason_codes
+    assert rep.classification is not None and rep.localization.mask_prob.shape == (64, 64)

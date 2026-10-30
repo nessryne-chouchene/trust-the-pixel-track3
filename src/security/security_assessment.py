@@ -60,7 +60,7 @@ __all__ = [
     "ConfigurationError",
 ]
 
-MODULE_VERSION = "1.0.1"
+MODULE_VERSION = "1.1.0"
 PathLike = Union[str, "os.PathLike[str]"]
 
 # --------------------------------------------------------------------------
@@ -500,6 +500,9 @@ def _check_format(image_path: PathLike, policy: Mapping[str, Any], trail: _Trail
                 trail.fail(step, "decode", FORMAT_DIMENSIONS, f"decompression bomb guard: {_exc_text(exc)}")
                 return None
             except Exception as exc:  # any decoder failure means a malformed image
+                fallback = _check_tiff_rasterio(data, policy, trail) if ext == "tif" else None
+                if fallback is not None:
+                    return data if fallback else None
                 trail.fail(step, "decode", FORMAT_DECODE, f"full decode failed: {_exc_text(exc)}")
                 return None
             trail.ok(step, "decode", f"mode {img.mode}")
@@ -508,9 +511,56 @@ def _check_format(image_path: PathLike, policy: Mapping[str, Any], trail: _Trail
         trail.fail(step, "dimensions", FORMAT_DIMENSIONS, f"decompression bomb guard: {_exc_text(exc)}")
         return None
     except Exception as exc:  # UnidentifiedImageError, SyntaxError, struct.error, ...
+        # Multiband or 16-bit GeoTIFFs (e.g. 13-band Sentinel-2) are beyond Pillow.
+        fallback = _check_tiff_rasterio(data, policy, trail) if ext == "tif" else None
+        if fallback is not None:
+            return data if fallback else None
         trail.fail(step, "decoder_format", FORMAT_DECODE, f"image library cannot open file as {expected_formats}: {_exc_text(exc)}")
         return None
     return data
+
+
+def _check_tiff_rasterio(data: bytes, policy: Mapping[str, Any], trail: _Trail) -> Optional[bool]:
+    """Fallback for GeoTIFFs that Pillow cannot decode (multiband, 16-bit, ...).
+
+    Returns True when the TIFF decodes, False when a format failure was
+    recorded, None when rasterio is unavailable or cannot open the bytes (the
+    caller then records Pillow's failure). Bands are decoded one at a time, so
+    peak memory is one band, and the pixel limit is checked before any read.
+    """
+    try:
+        import warnings
+        from rasterio.io import MemoryFile
+    except ImportError:
+        return None
+    step = "format"
+    opened = False
+    try:
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            with MemoryFile(data) as mem, mem.open() as ds:
+                if ds.driver != "GTiff":
+                    return None
+                opened = True
+                width, height, bands = ds.width, ds.height, ds.count
+                trail.ok(step, "decoder_format", f"GTiff via rasterio ({bands} bands, {ds.dtypes[0]})")
+                if width <= 0 or height <= 0 or bands <= 0:
+                    trail.fail(step, "dimensions", FORMAT_DIMENSIONS, f"empty raster {width}x{height}x{bands}")
+                    return False
+                if width * height > policy["max_pixels"]:
+                    trail.fail(step, "dimensions", FORMAT_DIMENSIONS,
+                               f"{width}x{height} = {width * height} px exceeds max_pixels {policy['max_pixels']}")
+                    return False
+                trail.ok(step, "dimensions", f"{width}x{height}x{bands}")
+                for band in range(1, bands + 1):
+                    ds.read(band)
+    except Exception as exc:
+        if not opened:
+            return None
+        trail.fail(step, "decode", FORMAT_DECODE, f"full decode failed (rasterio): {_exc_text(exc)}")
+        return False
+    trail.ok(step, "decode", f"{bands} bands via rasterio")
+    return True
 
 
 def _check_signature(

@@ -1,5 +1,6 @@
 """Tests des traces forensiques, du ForensicUNet, des metriques et des
 entrainements (donnees SYNTHETIQUES uniquement)."""
+import json
 import math
 
 import numpy as np
@@ -172,3 +173,28 @@ def test_threshold_takes_middle_of_optimal_range():
     from src.models.evaluation import choose_threshold
     t = choose_threshold([0, 0, 1, 1], [0.1, 0.2, 0.8, 0.9])  # tout seuil dans ]0.2, 0.8] est optimal
     assert 0.4 <= t <= 0.6
+
+
+def test_channel_subsets_train(tiny_npz, tmp_path):
+    from src.models.train_forensic import CHANNEL_SETS, run
+    p, _ = tiny_npz
+    for ch in ("rgb", "rgb+ela"):
+        res = run(npz=str(p), epochs=1, batch=8, base=8, out_dir=str(tmp_path / ch), verbose=False, channels=ch)
+        assert res["channels"] == ch
+        ck = torch.load(tmp_path / ch / "forensic_unet.pt")
+        assert len(ck["channels"]) == len(CHANNEL_SETS[ch])
+    with pytest.raises(ValueError):
+        run(npz=str(p), epochs=1, channels="nope", out_dir=str(tmp_path / "x"))
+
+
+def test_run_experiments_resumes_and_summarizes(tiny_npz, tmp_path, monkeypatch):
+    import src.models.run_experiments as rx
+    from src.models.train_forensic import run as real_run
+    p, _ = tiny_npz
+    monkeypatch.setattr(rx, "run", lambda **kw: real_run(**{**kw, "batch": 8, "base": 8}))
+    res = rx.main(npz=str(p), out=str(tmp_path), epochs=1, seeds=(0, 1))
+    assert set(res) == {"rgb_seed0", "rgb+srm_seed0", "rgb+ela_seed0", "rgb+srm+ela_seed0", "rgb+srm+ela_seed1"}
+    md = (tmp_path / "summary.md").read_text(encoding="utf-8")
+    assert "Ablation" in md and "mean" in md
+    again = rx.main(npz=str(p), out=str(tmp_path), epochs=1, seeds=(0, 1))   # tout est saute
+    assert json.dumps(again, sort_keys=True) == json.dumps(res, sort_keys=True)

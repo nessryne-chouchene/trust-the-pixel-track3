@@ -24,6 +24,13 @@ from src.models.train import set_seed
 from src.utils.metrics import auc_score, segmentation_metrics
 
 SEEN_ATTACKS = ("splice", "copy_move", "color_shift")
+#: Jeux de canaux pour l'ablation (indices dans CHANNEL_NAMES : R G B srm_1-3 ela).
+CHANNEL_SETS = {
+    "rgb": (0, 1, 2),
+    "rgb+srm": (0, 1, 2, 3, 4, 5),
+    "rgb+ela": (0, 1, 2, 6),
+    "rgb+srm+ela": (0, 1, 2, 3, 4, 5, 6),
+}
 
 
 def _augment(x: torch.Tensor, m: torch.Tensor, gen: torch.Generator):
@@ -53,14 +60,16 @@ def _val_score(labels, scores, probs, masks) -> tuple[float, float, float]:
     return auc + iou, auc, iou
 
 
-def measure_latency(model, image_uint8: np.ndarray, repeats: int = 20) -> dict:
+def measure_latency(model, image_uint8: np.ndarray, repeats: int = 20,
+                    sel: tuple = CHANNEL_SETS["rgb+srm+ela"]) -> dict:
     """Latence CPU par image (batch 1), calcul des traces forensiques INCLUS."""
     model.eval()
+    sel = list(sel)
     with torch.no_grad():
-        model(forensic_inputs(image_uint8))  # echauffement
+        model(forensic_inputs(image_uint8)[:, sel])  # echauffement
         t0 = time.perf_counter()
         for _ in range(repeats):
-            x = forensic_inputs(image_uint8)
+            x = forensic_inputs(image_uint8)[:, sel]
         t1 = time.perf_counter()
         for _ in range(repeats):
             model(x)
@@ -72,22 +81,26 @@ def measure_latency(model, image_uint8: np.ndarray, repeats: int = 20) -> dict:
 
 def run(npz: str = "data/processed/eurosat_tampered.npz", epochs: int = 30, lr: float = 1e-3,
         batch: int = 32, seed: int = 0, base: int = 24, out_dir: str = "outputs",
-        robust: bool = False, robust_prob: float = 0.5, verbose: bool = True) -> dict:
+        robust: bool = False, robust_prob: float = 0.5, verbose: bool = True,
+        channels: str = "rgb+srm+ela") -> dict:
     """robust=True : la moitie des images d'entrainement de chaque lot est
     blanchie au hasard (JPEG, reechantillonnage, bruit, flou) : c'est la
     reponse aux attaques d'evasion. Plus lent (traces recalculees par lot)."""
+    if channels not in CHANNEL_SETS:
+        raise ValueError(f"channels : un de {sorted(CHANNEL_SETS)}")
+    sel = list(CHANNEL_SETS[channels])
     set_seed(seed)
     with np.load(npz) as z:
         data = {k: z[k] for k in z.files}
     t0 = time.perf_counter()
-    inputs = forensic_inputs(data["images"])
+    inputs = forensic_inputs(data["images"])[:, sel]
     t_signals = time.perf_counter() - t0
     labels_np = data["labels"]
     labels = torch.from_numpy(labels_np).float()
     masks = torch.from_numpy(data["masks"]).float().unsqueeze(1)
     idx = {s: np.where(data["split"] == s)[0] for s in ("train", "val", "test")}
 
-    model = ForensicUNet(base=base)
+    model = ForensicUNet(in_channels=len(sel), base=base)
     opt = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=1e-4)
     sched = torch.optim.lr_scheduler.CosineAnnealingLR(opt, T_max=max(epochs, 1))
     gen = torch.Generator().manual_seed(seed)
@@ -109,7 +122,7 @@ def run(npz: str = "data/processed/eurosat_tampered.npz", epochs: int = 30, lr: 
                 for j in range(len(imgs)):
                     if rng.random() < robust_prob:
                         imgs[j] = random_launder(imgs[j], rng)
-                x = forensic_inputs(imgs)
+                x = forensic_inputs(imgs)[:, sel]
             else:
                 x = inputs[b]
             x, m = _augment(x, masks[b], gen)
@@ -149,7 +162,7 @@ def run(npz: str = "data/processed/eurosat_tampered.npz", epochs: int = 30, lr: 
     out.mkdir(parents=True, exist_ok=True)
     name = "forensic_unet_robust" if robust else "forensic_unet"
     torch.save({"state_dict": model.state_dict(), "base": base, "threshold": threshold,
-                "channels": CHANNEL_NAMES, "seed": seed, "robust": robust}, out / f"{name}.pt")
+                "channels": [CHANNEL_NAMES[i] for i in sel], "seed": seed, "robust": robust}, out / f"{name}.pt")
     res.update({
         "model": "ForensicUNet (RGB + SRM + ELA)" + (" + entrainement robuste" if robust else ""),
         "warning": "Falsifications synthetiques : resultats limites a ce cadre.",
@@ -158,7 +171,8 @@ def run(npz: str = "data/processed/eurosat_tampered.npz", epochs: int = 30, lr: 
         "parameters": count_parameters(model),
         "model_size_mb": count_parameters(model) * 4 / 1e6,
         "signals_seconds_total": t_signals, "train_seconds": t_train,
-        "latency": measure_latency(model, data["images"][te[0]]),
+        "channels": channels,
+        "latency": measure_latency(model, data["images"][te[0]], sel=tuple(sel)),
         "history": history,
     })
     (out / f"{name}_run.json").write_text(json.dumps(res, indent=2), encoding="utf-8")
