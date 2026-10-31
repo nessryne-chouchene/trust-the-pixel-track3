@@ -198,3 +198,34 @@ def test_run_experiments_resumes_and_summarizes(tiny_npz, tmp_path, monkeypatch)
     assert "Ablation" in md and "mean" in md
     again = rx.main(npz=str(p), out=str(tmp_path), epochs=1, seeds=(0, 1))   # tout est saute
     assert json.dumps(again, sort_keys=True) == json.dumps(res, sort_keys=True)
+
+
+def test_rgb_model_loads_and_runs_everywhere(tiny_npz, tmp_path):
+    from src.forensics.signals import detector_inputs
+    from src.models.evaluate_evasion import run as eval_run
+    from src.models.forensic_unet import load_detector
+    from src.models.train_forensic import run
+    from src.pipeline.analyze import detect
+    p, _ = tiny_npz
+    run(npz=str(p), epochs=1, batch=8, base=8, out_dir=str(tmp_path), verbose=False, channels="rgb")
+    model, thr = load_detector(tmp_path / "forensic_unet.pt")
+    assert model.input_channels == [0, 1, 2] and 0 < thr < 1
+    assert tuple(detector_inputs(_imgs(2), [0, 1, 2]).shape) == (2, 3, 64, 64)
+    score, mask, _ = detect(model, _imgs(1, 100, 80)[0])
+    assert mask.shape == (100, 80) and 0 <= score <= 1
+    res = eval_run(npz=str(p), model_path=str(tmp_path / "forensic_unet.pt"), out=str(tmp_path / "e.json"),
+                   calibration="far5")
+    assert "jpeg_q75" in res["results"]
+    assert load_detector(tmp_path / "forensic_unet_far5.pt")[0].input_channels == [0, 1, 2]
+
+
+def test_run_experiments_custom_and_robust(tiny_npz, tmp_path, monkeypatch):
+    import src.models.run_experiments as rx
+    from src.models.train_forensic import run as real_run
+    p, _ = tiny_npz
+    monkeypatch.setattr(rx, "run", lambda **kw: real_run(**{**kw, "batch": 8, "base": 8}))
+    rx.main(npz=str(p), out=str(tmp_path), epochs=1, seeds=(0, 1), channels=["rgb"])
+    res = rx.main(npz=str(p), out=str(tmp_path), epochs=1, seeds=(0,), channels=["rgb"], robust=True)
+    assert {"rgb_seed0", "rgb_seed1", "rgb_seed0_robust"} <= set(res)
+    md = (tmp_path / "summary.md").read_text(encoding="utf-8")
+    assert "Across seeds" in md and "Robust training" in md and "Val AUC" in md

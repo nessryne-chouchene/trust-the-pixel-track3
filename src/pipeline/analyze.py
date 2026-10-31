@@ -26,8 +26,8 @@ import numpy as np
 import torch
 from PIL import Image
 
-from src.forensics.signals import forensic_inputs
-from src.models.forensic_unet import ForensicUNet
+from src.forensics.signals import detector_inputs
+from src.models.forensic_unet import load_detector
 from src.security import security_assessment as sa
 from src.security.adapter import DEFAULT_CONFIG_DIR, to_validation_report
 from src.utils.contracts import (ClassificationOutput, ForensicReport, LocalizationOutput,
@@ -46,11 +46,7 @@ LIMITATIONS = [
 
 
 def load_model(path=DEFAULT_MODEL):
-    ckpt = torch.load(path, map_location="cpu")
-    model = ForensicUNet(base=ckpt["base"])
-    model.load_state_dict(ckpt["state_dict"])
-    model.eval()
-    return model, float(ckpt["threshold"])
+    return load_detector(path)
 
 
 def load_rgb_uint8(path) -> np.ndarray:
@@ -92,7 +88,7 @@ def detect(model, image: np.ndarray) -> tuple[float, np.ndarray, dict]:
                 tiles.append(image[y:y + TILE, x:x + TILE])
                 boxes.append((y, x, TILE, TILE))
     t0 = time.perf_counter()
-    inputs = forensic_inputs(np.stack(tiles))
+    inputs = detector_inputs(np.stack(tiles), getattr(model, "input_channels", None))
     t1 = time.perf_counter()
     cls_logits, mask_logits = model(inputs)
     t2 = time.perf_counter()

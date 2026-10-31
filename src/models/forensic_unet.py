@@ -33,6 +33,7 @@ class ForensicUNet(nn.Module):
         super().__init__()
         c1, c2, c3, c4 = base, base * 2, base * 4, base * 8
         self.in_channels = in_channels
+        self.input_channels = None   # indices dans CHANNEL_NAMES (None = les 7 canaux)
         self.enc1, self.enc2, self.enc3 = _block(in_channels, c1), _block(c1, c2), _block(c2, c3)
         self.bottleneck = _block(c3, c4)
         self.up3, self.dec3 = nn.ConvTranspose2d(c4, c3, 2, stride=2), _block(c4, c3)
@@ -85,6 +86,19 @@ class ForensicUNet(nn.Module):
                                    if mask_threshold is not None else None),
             ))
         return out
+
+
+def load_detector(path):
+    """Charge un detecteur sauvegarde ; retourne (modele, seuil). Le modele
+    porte ses canaux d'entree (model.input_channels), lus dans le fichier."""
+    from src.forensics.signals import CHANNEL_NAMES
+    ckpt = torch.load(path, map_location="cpu")
+    names = list(ckpt.get("channels", CHANNEL_NAMES))
+    model = ForensicUNet(in_channels=len(names), base=ckpt["base"])
+    model.load_state_dict(ckpt["state_dict"])
+    model.input_channels = [CHANNEL_NAMES.index(n) for n in names]
+    model.eval()
+    return model, float(ckpt["threshold"])
 
 
 def count_parameters(model: nn.Module) -> int:

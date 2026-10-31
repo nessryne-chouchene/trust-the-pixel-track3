@@ -75,6 +75,19 @@ def ela_map(images: np.ndarray, quality: int = ELA_QUALITY) -> torch.Tensor:
     return torch.from_numpy(out).unsqueeze(1)
 
 
+def detector_inputs(images: np.ndarray, channels=None) -> torch.Tensor:
+    """Entree d'un detecteur pour ses canaux (indices dans CHANNEL_NAMES).
+    None = les 7 canaux. RGB seul : SRM et ELA ne sont pas calcules du tout."""
+    if channels is None:
+        return forensic_inputs(images)
+    channels = list(channels)
+    if all(c < 3 for c in channels):
+        images = _check(images)
+        rgb = (torch.from_numpy(images).permute(0, 3, 1, 2).float() / 255.0 - 0.5) / 0.25
+        return rgb[:, channels]
+    return forensic_inputs(images)[:, channels]
+
+
 def forensic_inputs(images: np.ndarray, batch: int = 256) -> torch.Tensor:
     """(N, H, W, 3) uint8 -> entree du detecteur (N, 7, H, W) float32 :
     RGB centre-reduit, 3 residus SRM, 1 carte ELA."""

@@ -16,7 +16,7 @@ import torch
 import torch.nn.functional as F
 
 from src.forensics.evasion import random_launder
-from src.forensics.signals import CHANNEL_NAMES, forensic_inputs
+from src.forensics.signals import CHANNEL_NAMES, detector_inputs, forensic_inputs
 from src.models.evaluation import choose_threshold, evaluate, print_summary
 from src.models.forensic_unet import ForensicUNet, count_parameters
 from src.models.losses import dice_loss
@@ -66,10 +66,10 @@ def measure_latency(model, image_uint8: np.ndarray, repeats: int = 20,
     model.eval()
     sel = list(sel)
     with torch.no_grad():
-        model(forensic_inputs(image_uint8)[:, sel])  # echauffement
+        model(detector_inputs(image_uint8, sel))  # echauffement
         t0 = time.perf_counter()
         for _ in range(repeats):
-            x = forensic_inputs(image_uint8)[:, sel]
+            x = detector_inputs(image_uint8, sel)
         t1 = time.perf_counter()
         for _ in range(repeats):
             model(x)
@@ -93,7 +93,7 @@ def run(npz: str = "data/processed/eurosat_tampered.npz", epochs: int = 30, lr: 
     with np.load(npz) as z:
         data = {k: z[k] for k in z.files}
     t0 = time.perf_counter()
-    inputs = forensic_inputs(data["images"])[:, sel]
+    inputs = detector_inputs(data["images"], sel)
     t_signals = time.perf_counter() - t0
     labels_np = data["labels"]
     labels = torch.from_numpy(labels_np).float()
@@ -101,6 +101,7 @@ def run(npz: str = "data/processed/eurosat_tampered.npz", epochs: int = 30, lr: 
     idx = {s: np.where(data["split"] == s)[0] for s in ("train", "val", "test")}
 
     model = ForensicUNet(in_channels=len(sel), base=base)
+    model.input_channels = sel
     opt = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=1e-4)
     sched = torch.optim.lr_scheduler.CosineAnnealingLR(opt, T_max=max(epochs, 1))
     gen = torch.Generator().manual_seed(seed)
@@ -122,7 +123,7 @@ def run(npz: str = "data/processed/eurosat_tampered.npz", epochs: int = 30, lr: 
                 for j in range(len(imgs)):
                     if rng.random() < robust_prob:
                         imgs[j] = random_launder(imgs[j], rng)
-                x = forensic_inputs(imgs)[:, sel]
+                x = detector_inputs(imgs, sel)
             else:
                 x = inputs[b]
             x, m = _augment(x, masks[b], gen)

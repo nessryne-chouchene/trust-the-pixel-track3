@@ -16,8 +16,8 @@ import numpy as np
 import torch
 
 from src.forensics.evasion import LAUNDERING, feather, launder, random_launder
-from src.forensics.signals import forensic_inputs
-from src.models.forensic_unet import ForensicUNet
+from src.forensics.signals import detector_inputs
+from src.models.forensic_unet import load_detector
 from src.models.evaluation import choose_threshold
 from src.models.train_forensic import predict_all
 from src.utils.metrics import (auc_score, classification_metrics, recall_at_false_alarm,
@@ -25,11 +25,11 @@ from src.utils.metrics import (auc_score, classification_metrics, recall_at_fals
 
 
 def load_model(path: str):
-    ckpt = torch.load(path, map_location="cpu")
-    model = ForensicUNet(base=ckpt["base"])
-    model.load_state_dict(ckpt["state_dict"])
-    model.eval()
-    return model, float(ckpt["threshold"])
+    return load_detector(path)
+
+
+def _inputs(model, images):
+    return detector_inputs(images, getattr(model, "input_channels", None))
 
 
 def _metrics(labels, scores, probs, masks, threshold) -> dict:
@@ -49,8 +49,8 @@ def mixed_threshold(model, data: dict, seed: int = 0, max_far: float | None = No
     va = np.where(data["split"] == "val")[0]
     rng = np.random.default_rng(seed)
     laundered = np.stack([random_launder(img, rng) for img in data["images"][va]])
-    s_clean, _ = predict_all(model, forensic_inputs(data["images"][va]))
-    s_laund, _ = predict_all(model, forensic_inputs(laundered))
+    s_clean, _ = predict_all(model, _inputs(model, data["images"][va]))
+    s_laund, _ = predict_all(model, _inputs(model, laundered))
     y, sc = np.concatenate([data["labels"][va]] * 2), np.concatenate([s_clean, s_laund])
     if max_far is None:
         return choose_threshold(y, sc)
@@ -78,7 +78,7 @@ def run(npz: str = "data/processed/eurosat_tampered.npz", model_path: str = "out
 
     rows = {}
     for name in LAUNDERING:
-        x = forensic_inputs(launder(images, name, seed))
+        x = _inputs(model, launder(images, name, seed))
         s, p = predict_all(model, x)
         rows[name] = _metrics(labels, s, p, masks, threshold)
 
@@ -87,9 +87,9 @@ def run(npz: str = "data/processed/eurosat_tampered.npz", model_path: str = "out
     sel = np.where((attacks == "none") | (attacks == "splice"))[0]
     adv = np.stack([images[i] if attacks[i] == "none"
                     else feather(images[i], authentic_of[int(sources[i])], masks[i]) for i in sel])
-    s, p = predict_all(model, forensic_inputs(adv))
+    s, p = predict_all(model, _inputs(model, adv))
     rows["adaptive_feathered_splice"] = _metrics(labels[sel], s, p, masks[sel], threshold)
-    s0, p0 = predict_all(model, forensic_inputs(images[sel]))
+    s0, p0 = predict_all(model, _inputs(model, images[sel]))
     rows["splice_only_reference"] = _metrics(labels[sel], s0, p0, masks[sel], threshold)
 
     res = {"threshold": threshold, "calibration": calibration, "n_test": int(len(te)), "results": rows,
